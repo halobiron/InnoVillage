@@ -1,0 +1,161 @@
+import json
+
+from app.agent_core.compare import build_comparison
+from app.llm.client import FakeLLM
+
+
+def _row(brand, price, dientnang):
+    return {"model_code": brand, "brand": brand, "price_clean": price, "category": "Tủ Lạnh",
+            "key_specs_summary": "", "full_specs_json":
+            '{"Điện năng tiêu thụ": "%s kWh/năm"}' % dientnang}
+
+
+def test_none_for_single():
+    assert build_comparison([_row("A", 12_000_000, 350)], []) is None
+
+
+def test_price_row_marks_cheapest_best():
+    table = build_comparison([_row("A", 12_000_000, 350), _row("B", 11_000_000, 400)], [])
+    price_row = next(r for r in table.rows if r.label == "Giá")
+    assert price_row.cells[1].is_best is True   # B rẻ hơn
+    assert price_row.cells[0].is_best is False
+    assert len(table.products) == 2
+
+
+def test_brand_row_present():
+    table = build_comparison([_row("A", 12_000_000, 350), _row("B", 11_000_000, 400)], [])
+    assert any(r.label == "Thương hiệu" for r in table.rows)
+
+
+def test_energy_row_lower_is_best():
+    table = build_comparison([_row("A", 12_000_000, 350), _row("B", 11_000_000, 400)],
+                             ["tiết kiệm điện"], llm=FakeLLM(json_responses=[{"rules": [
+                                 {"field": "Điện năng tiêu thụ", "direction": "min", "kind": "number"}
+                             ]}]))
+    erow = next((r for r in table.rows if "Điện năng" in r.label), None)
+    assert erow is not None
+    assert erow.cells[0].is_best is True        # A tiêu thụ 350 < 400
+
+
+def test_tradeoffs_compare_products_and_only_warn_for_budget_overrun():
+    table = build_comparison([_row("A", 12_000_000, 350), _row("B", 11_000_000, 400)],
+                             ["tiết kiệm điện"], budget_max=11_500_000,
+                             llm=FakeLLM(json_responses=[{"rules": [
+                                 {"field": "Điện năng tiêu thụ", "direction": "min", "kind": "number"}
+                             ]}]))
+
+    assert table.tradeoffs is not None
+    assert table.tradeoffs[0].strengths[0].label == "Điện năng tiêu thụ"
+    assert table.tradeoffs[0].considerations[0].label.startswith("Độ khớp với ví tiền")
+    assert table.tradeoffs[1].strengths == []
+    assert table.tradeoffs[1].considerations[0].label == "Điện năng tiêu thụ"
+
+
+def test_budget_overrun_is_still_a_consideration_when_no_spec_is_weaker():
+    table = build_comparison([_row("A", 12_000_000, 350), _row("B", 11_000_000, 350)], [],
+                             budget_max=11_500_000,
+                             llm=FakeLLM(json_responses=[{"rules": [
+                                 {"field": "Điện năng tiêu thụ", "direction": "min", "kind": "number"}
+                             ]}]))
+
+    assert table.tradeoffs[0].strengths == []
+    assert table.tradeoffs[0].considerations[0].label.startswith("Độ khớp với ví tiền")
+    assert table.tradeoffs[1].strengths == []
+    assert table.tradeoffs[1].considerations == []
+
+
+def test_missing_cell_marked_unavailable():
+    rows = [{"model_code": "A", "brand": "A", "price_clean": 0, "category": "X",
+             "full_specs_json": "{}", "key_specs_summary": ""},
+            {"model_code": "B", "brand": "B", "price_clean": 11_000_000, "category": "X",
+             "full_specs_json": "{}", "key_specs_summary": ""}]
+    table = build_comparison(rows, [])
+    price_row = next(r for r in table.rows if r.label == "Giá")
+    assert price_row.cells[0].available is False
+    assert price_row.cells[0].value == "chưa có dữ liệu"
+
+
+def test_monitor_rules_rank_size_resolution_and_dimensions():
+    def monitor(brand, size, resolution, width, depth):
+        return {
+            "model_code": brand, "brand": brand, "price_clean": 10_000_000,
+            "category": "Màn hình máy tính", "key_specs_summary": "",
+            "full_specs_json": (
+                '{"Kích thước màn hình": "%s inch", "Độ phân giải": "%s", '
+                '"Ngang": "%s mm", "Dày": "%s mm", "Tấm nền": "IPS"}'
+                % (size, resolution, width, depth)
+            ),
+        }
+
+    table = build_comparison([
+        monitor("A", 23.8, "QHD", 611, 216),
+        monitor("B", 27, "Full HD", 620, 180),
+    ], [], llm=FakeLLM(json_responses=[{"rules": [
+        {"field": "Kích thước màn hình", "direction": "max", "kind": "number"},
+        {"field": "Độ phân giải", "direction": "max", "kind": "ranked", "scores": [3, 2]},
+        {"field": "Ngang", "direction": "min", "kind": "number"},
+        {"field": "Dày", "direction": "min", "kind": "number"},
+        {"field": "Tấm nền", "direction": "none", "kind": "number"},
+    ]}]))
+    by_label = {row.label: row for row in table.rows}
+    assert by_label["Kích thước màn hình"].cells[1].is_best is True
+    assert by_label["Độ phân giải"].cells[0].is_best is True
+    assert by_label["Ngang"].cells[0].is_best is True
+    assert by_label["Dày"].cells[1].is_best is True
+    assert by_label["Tấm nền"].better is None
+
+
+def test_all_shared_fields_are_kept_not_limited_to_four():
+    rows = [
+        {"model_code": "A", "brand": "A", "price_clean": 1, "category": "X",
+         "key_specs_summary": "", "full_specs_json":
+         '{"A": "1", "B": "1", "C": "1", "D": "1", "E": "1"}'},
+        {"model_code": "B", "brand": "B", "price_clean": 2, "category": "X",
+         "key_specs_summary": "", "full_specs_json":
+         '{"A": "2", "B": "2", "C": "2", "D": "2", "E": "2"}'},
+    ]
+    table = build_comparison(rows, [])
+    assert {"A", "B", "C", "D", "E"}.issubset({row.label for row in table.rows})
+
+
+def test_comparison_rules_use_one_bounded_llm_call_for_large_catalogs():
+    fields = {f"Thông số {i}": str(i) for i in range(13)}
+    fields2 = {f"Thông số {i}": str(i + 1) for i in range(13)}
+    rows = [
+        {"model_code": "A", "brand": "A", "price_clean": 1, "category": "X",
+         "key_specs_summary": "", "full_specs_json": json.dumps(fields)},
+        {"model_code": "B", "brand": "B", "price_clean": 2, "category": "X",
+         "key_specs_summary": "", "full_specs_json": json.dumps(fields2)},
+    ]
+    llm = FakeLLM(json_responses=[
+        {"rules": [
+            {"field": "Thông số 0", "direction": "max", "kind": "number"},
+            {"field": "Thông số 12", "direction": "max", "kind": "number"},
+        ]},
+    ])
+
+    table = build_comparison(rows, [], llm=llm)
+
+    by_label = {row.label: row for row in table.rows}
+    assert len(llm.calls) == 1
+    assert by_label["Thông số 0"].cells[1].is_best is True
+    assert by_label["Thông số 12"].cells[1].is_best is True
+
+
+def test_comparison_keeps_more_than_six_model_inferred_rules():
+    fields = {f"Thông số {i}": str(i) for i in range(7)}
+    rows = [
+        {"model_code": "A", "brand": "A", "price_clean": 1, "category": "X",
+         "key_specs_summary": "", "full_specs_json": json.dumps(fields)},
+        {"model_code": "B", "brand": "B", "price_clean": 2, "category": "X",
+         "key_specs_summary": "", "full_specs_json": json.dumps(
+             {field: str(i + 1) for i, field in enumerate(fields)})},
+    ]
+    llm = FakeLLM(json_responses=[{"rules": [
+        {"field": field, "direction": "max", "kind": "number"}
+        for field in fields
+    ]}])
+
+    table = build_comparison(rows, [], llm=llm)
+
+    assert sum(row.is_need_row for row in table.rows) == 7

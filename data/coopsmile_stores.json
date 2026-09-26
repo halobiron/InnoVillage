@@ -1,0 +1,571 @@
+{
+  "source": "https://coopsmile.vn/pages/he-thong-cua-hang-co-opsmile",
+  "retrieved_at": "2026-09-26",
+  "note": "Cửa hàng được công bố trên website. Việc có mặt trong danh sách không xác nhận tồn kho sản phẩm.",
+  "stores": [
+    {
+      "store_code": "CS-077",
+      "address": "43 Đề Thám, Phường Cô Giang, Quận 1",
+      "phone": "+84911825733",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-078",
+      "address": "1A1 Đường Nguyễn Đình Chiểu, P.Đa Kao, Q1, TP.HCM",
+      "phone": "+84911842794",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-079",
+      "address": "TK38/1 Nguyễn Cảnh Chân, Phường Nguyễn Cư Trinh, Quận 1",
+      "phone": "+84911842761",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-080",
+      "address": "D48C Nguyễn Trãi, P. Nguyễn Cư Trin",
+      "phone": "+84911842747",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-083",
+      "address": "311 M36 Khu tái định cư Thủ Thiêm, P. An Phú, Quận 2, TP. HCM",
+      "phone": "+840911825720",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-085",
+      "address": "9/9 Đường 9, Phường An Khánh, TP.HCM",
+      "phone": "+84907071101",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-088",
+      "address": "599 Điện Biên Phủ, Phường 1, Quận 3",
+      "phone": "+84911843213",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-089",
+      "address": "Quầy 1 - Khu A Chợ Nguyễn Văn Trỗi, Phường 13, Quận 3",
+      "phone": "+84911825717",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-090",
+      "address": "16/16 Nguyễn Thiện Thuật, Phường 2, Quận 3",
+      "phone": "+84911842857",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-091",
+      "address": "424 Nguyễn Đình Chiểu, Phường 4, Quận 3",
+      "phone": "+84911842851",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-092",
+      "address": "380/1 Bis Nam Kỳ Khởi Nghĩa, Phường 8, Quận 3",
+      "phone": "+84911843208",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-093",
+      "address": "58 Cách Mạng Tháng Tám, Phường 6, Quận 3",
+      "phone": "+84911842843",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-094",
+      "address": "91/1 (cua sau) Tran Quang Dieu, P. 13, Q.3, TP.HCM",
+      "phone": "+84911842771",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-095",
+      "address": "122ABC Cach Mang Thang Tam, P.3, Q.3, TP.HCM",
+      "phone": "+84911842832",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-096",
+      "address": "56 Bàn Cờ, Phường 3, quận 3, TP.HCM",
+      "phone": "+84919980030",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-097",
+      "address": "175 Trần Văn Đang, Phường 11, Quận 3, TPHCM",
+      "phone": "+84911657538",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-098",
+      "address": "67 Đường Số 3 Cư Xá Đô Thành, Phường Bàn Cờ, TP.HCM",
+      "phone": "+84911843215",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-101",
+      "address": "G1.008-Chung cu Galaxy 9, 09 Nguyen Khoai, Phường 1, Quận 4",
+      "phone": "+84911901127",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-104",
+      "address": "57 Trần Bình Trọng, Phường 1, Quận 5",
+      "phone": "+84911842855",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-105",
+      "address": "52 Nguyễn Văn Đừng, Phường 6, Quận 5",
+      "phone": "+84911843221",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-106",
+      "address": "156 Trần Hưng Đạo, Phường 7, Quận 5",
+      "phone": "+84911825731",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-110",
+      "address": "D22 Cư xá Phú Lâm B, phường 13, quận 6",
+      "phone": "+84913236930",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-111",
+      "address": "23 Đường số 19, Phường Bình Phú, TP.HCM",
+      "phone": "+84911585109",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-124",
+      "address": "59 Bùi Điền, Phường 4, Quận 8",
+      "phone": "+84911842766",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-125",
+      "address": "157/46 Dương Bá Trạc, P.1, Q.8, TP.HCM",
+      "phone": "+84911901151",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-126",
+      "address": "326 Dương Bá Trạc, Phường 1, Quận 8",
+      "phone": "+84919901600",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-127",
+      "address": "22 Phong Phú, P.Xóm Củi, Q.8, TP.HCM",
+      "phone": "+84916573733",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-128",
+      "address": "123A Tám Danh, P.4, Q.8, TP.HCM",
+      "phone": "+84913113040",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-130",
+      "address": "711 Ba Đình, Phường Chánh Hưng, TP.HCM",
+      "phone": "+84911148022",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-131",
+      "address": "17 Huỳnh Thị Phụng, Phường Chánh Hưng, TP.HCM",
+      "phone": "+84911149497",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-133",
+      "address": "3/38 Thành Thái, Phường 14, Quận 10",
+      "phone": "+84911842856",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-134",
+      "address": "284/9 Lý Thường Kiệt, Phường 14, Quận 10",
+      "phone": "+84911863510",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-136",
+      "address": "606/51 Đường 3 tháng 2, Phường 14, Quận 10, TPHCM",
+      "phone": "+84911657538",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-137",
+      "address": "631A Cách Mạng Tháng Tám, Phường Hòa Hưng, TP.HCM",
+      "phone": "+84911022976",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-138",
+      "address": "163 Tô Hiến Thành, Phường Hòa Hưng, TP.HCM",
+      "phone": "+84915862833",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-139",
+      "address": "105 Đào Duy Từ, Phường Diên Hồng, TP.HCM",
+      "phone": "+84911842846",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-141",
+      "address": "Số 7 Lô A5 Cư Xá 47 Trịnh Đình Trọng, Phường 5, Quận 11",
+      "phone": "+84911842804",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-142",
+      "address": "173 Phó Cơ Điều, Phường 6, Quận 11",
+      "phone": "+84911825742",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-143",
+      "address": "341/81A Lạc Long Quân, Phường 5, Quận 11",
+      "phone": "+84911901124",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-144",
+      "address": "75 Cư xá Lạc Long Quân; Phường 5; Quận 11",
+      "phone": "+84911995205",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-145",
+      "address": "85 Tuệ Tĩnh, Phường 13, Quận 11",
+      "phone": "+84911412539",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-146",
+      "address": "377-379 Hàn Hải Nguyên, Phường 2, Quận 11",
+      "phone": "+84919910130",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-147",
+      "address": "106i/13 Lạc Long Quân, P,3, Q,11, TP.HCM",
+      "phone": "+84916853038",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-148",
+      "address": "41 Lò Siêu, P.16, Q.11, TP. HCM",
+      "phone": "+84915529089",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-149",
+      "address": "149E Đội Cung, Phường Bình Thới, TP.HCM",
+      "phone": "+84911825729",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-152",
+      "address": "80 đường Thạnh Xuân 13, Phường Thạnh Xuân, Quận 12",
+      "phone": "+84911843219",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-153",
+      "address": "D80 KDC THỚI AN, LÊ THỊ RIÊNG, PHƯỜNG THỚI AN, QUẬN 12",
+      "phone": "+84911901126",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-154",
+      "address": "A1.01 Hung Ngan Garden,48A Duong Thi Muoi,Q.12",
+      "phone": "+84911842798",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-157",
+      "address": "79 Nguyên Hồng, Phường 11, Quận Binh Thanh",
+      "phone": "+84911842858",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-159",
+      "address": "27/17 Điện Biên Phủ, Phường 15, Quận Binh Thanh",
+      "phone": "+84911842802",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-160",
+      "address": "125/47 Bùi Đình Túy, Phường 24, Quận Bình Thạnh",
+      "phone": "+84911842803",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-161",
+      "address": "69/31 Nguyễn Gia Trí, Phường 25, Quận Bình Thạnh",
+      "phone": "+84911825736",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-162",
+      "address": "687B Xô Viết Nghệ Tĩnh, Phường 26, Quận Bình Thạnh",
+      "phone": "+84911825743",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-163",
+      "address": "29 (Số cũ 21) Vũ Huy Tần, Phường 3, Quận Bình Thạnh",
+      "phone": "+84911825716",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-164",
+      "address": "15B Trần Bình Trọng, Phường 5, Quận Bình Thạnh",
+      "phone": "+84911825744",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-165",
+      "address": "42/38 Hoàng Hoa Thám, Phường 7, Quận Bình Thạnh",
+      "phone": "+84911825735",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-166",
+      "address": "15/12 Võ Duy Ninh, Phường 22, Quận Bình Thạnh",
+      "phone": "+84911842838",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-167",
+      "address": "14 Nguyen Cuu Van, P. 17, Q. Binh Thanh, TP.HCM",
+      "phone": "+84911842839",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-168",
+      "address": "445/20B Nơ Trang Long, Phường 13, Quận Bình Thạnh, TP. HCM",
+      "phone": "+84911842845",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-198",
+      "address": "84 Cao Thắng, Phường 17, Quận Phú Nhuận, TP. Hồ Chí Minh",
+      "phone": "+84911842834",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-199",
+      "address": "127/50 Cô Giang, Phường 2, Quận Phú Nhuận",
+      "phone": "+84911842846",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-202",
+      "address": "17 Lô A Chung Cư Bàu Cát 2, Phường 10, Quận Tân Bình",
+      "phone": "+84911842854",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-203",
+      "address": "37 Trần Mai Ninh, Phường 12, Quận Tân Bình",
+      "phone": "+84911842801",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-204",
+      "address": "18 Nguyễn Thanh Tuyền, Phường 2, Quận Tân Bình",
+      "phone": "+84911842853",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-205",
+      "address": "198 Đất Thánh, Phường 6, Quận Tân Bình",
+      "phone": "+84911843210",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-206",
+      "address": "958/15 Lạc Long Quân, Phường 8, Quận Tân Bình",
+      "phone": "+84911842848",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-207",
+      "address": "144/4 Âu Co, P.9, Q.Tan Binh, TP.HCM",
+      "phone": "+84911995361",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-208",
+      "address": "80/7 Ba Van, P. 14, Q. Tan Binh, TP.HCM",
+      "phone": "+84911695852",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-209",
+      "address": "Chung cư The Useful - 654/6 Lạc Long Quân, P.9, Q. Tân Bình",
+      "phone": "+84911842750",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-210",
+      "address": "2 Bảy HIền P. 11 Q. Tân Bình",
+      "phone": "+84911825712",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-211",
+      "address": "52 Lý Thường Kiệt, P.11, Q.Tân Bình, TP.HCM",
+      "phone": "+84916643038",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-212",
+      "address": "33 Nguyễn Đình Khơi, P.Tân Sơn Nhất, TP.HCM",
+      "phone": "+84911825705",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-213",
+      "address": "41 Bành Văn Trân, P. Tân Sơn Nhất, TP.HCM",
+      "phone": "+84911637808",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-215",
+      "address": "55 Tân Quý, Phường Tân Sơn Nhì, TP.HCM",
+      "phone": "+84911842754",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-217",
+      "address": "7 Đỗ Nhuận, Phường Sơn Kỳ, Quận Tân Phú",
+      "phone": "+84911843218",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-218",
+      "address": "2D Duong C2, P.Tây Thạnh, Q.Tân Ph",
+      "phone": "+84911842702",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-221",
+      "address": "389 Âu Cơ, P.Phú Trung, Q.Tân Phú, TP.HCM",
+      "phone": "+84911825713",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-222",
+      "address": "Chung cư Sơn Kỳ, B005 Đường CN13-DC8-DC13, P.Sơn Kỳ, Q.Tân Phú",
+      "phone": "+84919912900",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-225",
+      "address": "D1 Tecco Town, 4449 Nguyen Cuu Phu, Binh Tan",
+      "phone": "+84915073289",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-229",
+      "address": "97 Phú Châu, Phường Tam Bình, Quận Thủ Đức",
+      "phone": "+84911843209",
+      "opening_hours": "06:00-21:30"
+    },
+    {
+      "store_code": "CS-230",
+      "address": "53 Võ Văn Ngân; Phường Linh Chiểu, Quận Thủ Đức",
+      "phone": "+84911901125",
+      "opening_hours": "06:00-20:30"
+    },
+    {
+      "store_code": "CS-231",
+      "address": "D1.14 - Chung cu Jamila, P.Phu Huu, TP.ThuDuc",
+      "phone": "+84911825754",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-232",
+      "address": "64 Nguyễn Văn Thạnh, P.Long Thạnh Mỹ, TP.Thủ Đức",
+      "phone": "+84912303062",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-233",
+      "address": "Chung cư Ricca, 33/2 Gò Cát, KP4, P. Phú Hữu, TP.Thủ Đức",
+      "phone": "+84912331276",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-234",
+      "address": "Chung cư Chương Dương Home - 34 Đường Số 12, Trường Thọ, Thủ Đức, Hồ Chí Minh",
+      "phone": "+84919903055",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-235",
+      "address": "8 Đường số 102, P.Tăng Nhơn Phú A, TP.Thủ Đức, TP.HCM",
+      "phone": "+84911843211",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-236",
+      "address": "50 Lê Văn Việt, P.Hiệp Phú, TP.Thủ Đức",
+      "phone": "+84917032526",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-237",
+      "address": "65 (B/128) Đường 2, Phường Tăng Nhơn Phú, TP.HCM",
+      "phone": "+84911901022",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-240",
+      "address": "48 Đường số 10, Xã Bình Hưng, TP.HCM",
+      "phone": "+84911139484",
+      "opening_hours": "06:30-22:00"
+    },
+    {
+      "store_code": "CS-244",
+      "address": "1132 Tỉnh lộ 15, Tổ 7, Ấp Thạnh An, Xã Trung An, Huyện Củ Chi",
+      "phone": "+84911842746",
+      "opening_hours": "06:30-21:30"
+    },
+    {
+      "store_code": "CS-245",
+      "address": "248 Tỉnh lộ 15, Xã Phú Hòa Đông, TP.HCM",
+      "phone": "+84911842703",
+      "opening_hours": "06:30-21:30"
+    },
+    {
+      "store_code": "CS-246",
+      "address": "18 Hà Duy Phiên, Xã Bình Mỹ, TP.HCM",
+      "phone": "+84915528739",
+      "opening_hours": "06:30-21:30"
+    },
+    {
+      "store_code": "CS-249",
+      "address": "Ký túc xá ĐHQG, Tòa nhà A1, KTX Khu B, Phố Tân Hòa, Phường Đông Hòa, Thị xã Dĩ An, Bình Dương",
+      "phone": "+84911843220",
+      "opening_hours": "06:00-22:00"
+    },
+    {
+      "store_code": "CS-250",
+      "address": "Ký túc xá ĐHQG, Tòa nhà D3, KTX Khu B, Phố Tân Hòa, Phường Đông Hòa, Thị xã Dĩ An, Bình Dương",
+      "phone": "+84911843202",
+      "opening_hours": "06:00-22:00"
+    }
+  ]
+}
