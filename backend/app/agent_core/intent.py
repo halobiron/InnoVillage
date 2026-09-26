@@ -73,7 +73,7 @@ class IntentSchema(BaseModel):
     )
     is_product_detail_question: bool = Field(
         default=False,
-        description="True khi khách đang hỏi thêm thông tin về MỘT sản phẩm đã xuất hiện trong lịch sử, kể cả gọi là 'máy này', 'máy đầu tiên' hoặc nêu hãng/mẫu. False khi muốn xem thêm danh sách, so sánh, hay bắt đầu nhu cầu mua mới."
+        description="True khi khách đang hỏi thêm thông tin về MỘT sản phẩm đã xuất hiện trong lịch sử, kể cả gọi là 'món này', 'sản phẩm đầu tiên' hoặc nêu hãng/tên. False khi muốn xem thêm danh sách, so sánh, hay bắt đầu nhu cầu mua mới."
     )
     selected_product_id: Optional[str] = Field(
         default=None,
@@ -81,11 +81,11 @@ class IntentSchema(BaseModel):
     )
     is_meta_inquiry: bool = Field(
         default=False,
-        description="True khi khách hỏi khái niệm/thông số liên quan sản phẩm (OLED, Inverter, dung tích...) hoặc hỏi tổng quan catalog. Không dùng cho kiến thức phổ thông ngoài mua sắm."
+        description="True khi khách hỏi chi tiết thành phần, quy cách, dung tích hoặc hỏi tổng quan catalog. Không dùng cho kiến thức phổ thông ngoài mua sắm."
     )
     meta_reply: Optional[str] = Field(
         default=None,
-        description="Nếu is_meta_inquiry=true: 1-2 câu giải thích ngắn gọn, dân dã về khái niệm/thông số đó (kèm lợi ích thực tế nếu có), sau đó BẮT BUỘC đặt lại câu hỏi khéo léo để tiếp tục lấy thông tin (VD 'Dạ Inverter giúp tiết kiệm điện ạ. Nhà mình định mua máy tầm giá bao nhiêu?')."
+        description="Nếu is_meta_inquiry=true: trả lời ngắn dựa trên thông tin đã xác minh; không đưa ra tuyên bố về công dụng sức khỏe hay hiệu quả sản phẩm nếu thiếu nguồn. Sau đó hỏi nhẹ về sản phẩm khách đang tìm."
     )
     is_policy_question: bool = Field(
         default=False,
@@ -105,15 +105,15 @@ class IntentSchema(BaseModel):
     )
     transition_message: Optional[str] = Field(
         default=None,
-        description="Lời chuyển tiếp tự nhiên, giải thích khéo léo lý do chọn danh mục này khi khách chỉ nêu vấn đề chứ không gọi tên sản phẩm (VD: 'Dạ nếu cô giáo không cho mang điện thoại thì bé nhà mình mang đồng hồ thông minh có nghe gọi được không ạ?')."
+        description="Lời chuyển tiếp tự nhiên khi khách nêu nhu cầu nhưng chưa gọi tên danh mục sản phẩm."
     )
     unsupported_product: Optional[str] = Field(
         default=None,
-        description="Loại sản phẩm khách muốn mua nhưng KHÔNG thuộc danh mục nào trong CSDL (VD 'điện thoại'). None nếu khách hỏi đúng mặt hàng có bán."
+        description="Loại sản phẩm khách muốn mua nhưng KHÔNG thuộc danh mục nào trong catalog Co.opSmile. None nếu khách hỏi đúng mặt hàng có bán."
     )
     related_categories: List[str] = Field(
         default_factory=list,
-        description="Khi unsupported_product khác None: 1-3 danh mục CÓ TRONG CSDL gần nhất với nhu cầu đó (VD điện thoại -> Máy tính bảng, Đồng hồ thông minh)."
+        description="Khi unsupported_product khác None: 1-3 danh mục có trong catalog gần nhất với nhu cầu đó."
     )
     unsupported_reply: Optional[str] = Field(
         default=None,
@@ -130,7 +130,7 @@ class IntentSchema(BaseModel):
     )
     priority_features: List[str] = Field(
         default_factory=list,
-        description="Các tính năng hoặc thông số đặc thù người dùng ưu tiên (màn hình lớn, pin trâu, mỏng nhẹ...)."
+        description="Các thuộc tính người dùng ưu tiên như thương hiệu, quy cách, mùi hương hoặc loại sản phẩm."
     )
     wants_comparison: bool = Field(
         default=False,

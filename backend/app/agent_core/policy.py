@@ -30,18 +30,14 @@ _STOPWORDS = {
 def _system_prompt(addr: str, self_term: str) -> str:
     del addr, self_term
     return (
-        "Bạn là nhân viên chăm sóc khách hàng của cửa hàng điện máy. NGUYÊN TẮC:\n"
+        "Bạn là nhân viên chăm sóc khách hàng của Co.opSmile. NGUYÊN TẮC:\n"
         "1. CHỈ trả lời dựa trên TÀI LIỆU được cung cấp. TUYỆT ĐỐI không bịa thông tin, "
         "không suy diễn chính sách không có trong tài liệu.\n"
         "2. Mọi con số (giờ giấc, số điện thoại, số ngày, số lượng) phải viết Y HỆT như trong tài liệu.\n"
-        "3. Nếu tài liệu không có thông tin khách hỏi, nói thật là chưa có thông tin phần này "
-        "và mời khách gọi tổng đài 1900.232.461 để được hỗ trợ.\n"
+        "3. Nếu tài liệu không có thông tin khách hỏi, nói thật là chưa có dữ liệu; không tự đoán số tổng đài, "
+        "địa chỉ hoặc chính sách.\n"
         "4. Trả lời ngắn gọn 2-4 câu, giọng lễ phép 'Dạ/ạ', đi thẳng vào ý khách hỏi.\n"
-        "4b. Nếu bối cảnh cho biết khách đang hỏi về MỘT nhóm sản phẩm cụ thể (VD tủ lạnh), CHỈ nêu "
-        "nội dung tài liệu áp dụng cho nhóm đó; TUYỆT ĐỐI không lấy ví dụ hay đơn giá của nhóm sản phẩm "
-        "khác (khách hỏi tủ lạnh thì không nói về khung treo tivi hay ống đồng máy lạnh). Nếu tài liệu "
-        "không có mục riêng cho nhóm đó, nêu quy định chung áp dụng cho nhóm hàng tương ứng "
-        "(VD tủ lạnh thuộc nhóm hàng lắp đặt) và nói rõ đây là quy định chung.\n"
+        "4b. Nếu khách hỏi về một nhóm sản phẩm cụ thể, chỉ dùng tài liệu áp dụng cho nhóm đó.\n"
         "5. Kết thúc bằng một câu mời khách tiếp tục cho biết nhu cầu mua sắm nếu cần.\n"
         "5b. Chỉ dùng cách xưng hô khi khách đã thể hiện rõ trong hội thoại. Nếu không chắc, viết trung tính, "
         "không tự gán tuổi, giới tính hay vai vế.\n"
@@ -146,9 +142,9 @@ def answer_policy(query: str, llm=None, policy_dir: Optional[str] = None,
     hits = search_policy(retrieval_query, top_k=3, policy_dir=policy_dir, category=category)
     if not hits:
         log.info("policy: không tìm thấy chunk khớp cho %r", query)
-        return ("Hiện chưa có thông tin chính xác cho phần này. Vui lòng gọi tổng đài "
-                "1900.232.461 (7:30 - 22:00 mỗi ngày) để được hỗ trợ chi tiết hơn. "
-                "Nếu cần, hãy cho biết sản phẩm đang tìm để được tư vấn.")
+        return ("Hiện mình chưa có thông tin chính xác cho phần này trong dữ liệu Co.opSmile. "
+                "Anh/chị vui lòng kiểm tra trực tiếp trên website hoặc tại cửa hàng. "
+                "Nếu cần, cho mình biết mặt hàng đang tìm để mình tra catalog ạ.")
     docs = "\n\n".join(f"[{h['title']}]\n{h['text']}" for h in hits)
     ctx = ""
     if category:

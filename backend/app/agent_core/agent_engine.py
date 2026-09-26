@@ -346,7 +346,7 @@ def detail_node(state: AgentState, config) -> AgentState:
 
 
 def confirm_purchase_node(state: AgentState, config) -> AgentState:
-    """Khách chốt đơn một máy đang bàn -> ghi nhận vào lịch sử mua hàng của phiên (nền tảng
+    """Khách xác nhận mua sản phẩm đang bàn -> ghi nhận vào lịch sử mua hàng của phiên (nền tảng
     cho chăm sóc sau mua) và chốt sổ: gỡ rào phí giao hàng + gợi mở mua kèm 1 lần nữa."""
     query = state.get("query", "")
     last = state.get("last_products", []) or []
@@ -364,9 +364,8 @@ def confirm_purchase_node(state: AgentState, config) -> AgentState:
     name = product_display_name(row)
     price = float(row.get("price_clean") or 0)
     price_txt = format_vnd(int(price)) if price > 0 else "chưa có dữ liệu giá"
-    warranty = load_specs(row).get("bảo hành (crawl)")
     entry = {"sku": _sku(row), "name": name, "category": row.get("category"),
-             "price": price, "warranty": warranty}
+             "price": price}
     purchases = [p for p in (state.get("purchase_history") or []) if p.get("sku") != entry["sku"]]
     purchases.append(entry)
     hook = closing_hook(row.get("category"), price)
@@ -383,13 +382,12 @@ def confirm_purchase_node(state: AgentState, config) -> AgentState:
 
 
 def aftersales_node(state: AgentState, config) -> AgentState:
-    """Chăm sóc sau mua (2.7): trả lời bảo hành/chính sách ưu đãi TRA THEO lịch sử mua hàng
-    của phiên (do confirm_purchase_node ghi nhận) — không suy diễn cho máy khách chưa chốt."""
+    """Chăm sóc sau mua: chỉ trả lời chính sách đã có trong tài liệu cửa hàng."""
     _notify(config, "Đang tra cứu thông tin đơn hàng…")
     purchases = state.get("purchase_history") or []
     if not purchases:
-        text = ("Hiện chưa thấy đơn hàng nào trong phiên tư vấn này. Hãy cho biết tên hoặc mã máy đã mua để tra cứu "
-                "bảo hành, hoặc gọi tổng đài 1900.232.461 (7:30 - 22:00 mỗi ngày) để được hỗ trợ trực tiếp.")
+        text = ("Hiện chưa ghi nhận sản phẩm đã mua trong phiên này. Anh/chị vui lòng kiểm tra đơn hàng "
+                "trên kênh Co.opSmile hoặc cho mình biết mặt hàng cần hỏi ạ.")
         history = state.get("history", []) + [{"role": "assistant", "content": text}]
         return {"response": text, "stage": "recommended", "question": None,
                 "cards": [], "comparison": None, "assumptions": [], "warnings": [], "history": history}
@@ -398,11 +396,7 @@ def aftersales_node(state: AgentState, config) -> AgentState:
     history_msgs = (state.get("history") or [])[:-1]
     policy_reply = answer_policy(query, _cfg(config, "llm"), history=history_msgs,
                                  category=last_purchase.get("category"))
-    warranty_line = ""
-    if last_purchase.get("warranty"):
-        warranty_line = (f" Riêng {last_purchase['name']}, thời hạn bảo hành ghi nhận "
-                         f"từ nhà bán là {last_purchase['warranty']} (nguồn: dienmayxanh.com).")
-    text = f"Thông tin về {last_purchase['name']} đã đặt:{warranty_line} {policy_reply}"
+    text = f"Thông tin về {last_purchase['name']} đã mua: {policy_reply}"
     cross = cross_sell_suggestion(last_purchase.get("category"), last_purchase.get("price") or 0,
                                   db_path=_cfg(config, "db_path"), exclude_sku=last_purchase.get("sku"))
     if cross:
