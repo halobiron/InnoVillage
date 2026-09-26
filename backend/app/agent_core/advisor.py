@@ -160,11 +160,10 @@ def generate_advisor(query: str, intent: Dict[str, Any], rows: List[Dict[str, An
     trans_txt = f"LỜI CHUYỂN TIẾP (BẮT BUỘC dùng câu này làm câu mở đầu để giải thích sự suy luận): {transition}\n" if transition else ""
     
     wants_comp = intent.get("wants_comparison", False)
-    # Chỉ chốt sale ngay (gỡ rào cản giao/lắp đặt rồi mời đặt hàng) khi đây là một đề xuất
-    # ngắn gọn 1-2 sản phẩm, không phải bảng so sánh trade-off nhiều lựa chọn.
+    # Chỉ dùng lời mời xem tiếp ngắn khi đây là một đề xuất đơn, không phải bảng so sánh.
     is_single_recommend = not wants_comp and len(cards) > 0
     if is_single_recommend:
-        # Câu hỏi cuối (chốt) do code chèn thêm sau (closing_hook), KHÔNG để LLM tự hỏi
+        # Lời mời xem tiếp do code chèn thêm sau (closing_hook), KHÔNG để LLM tự hỏi
         # lại kiểu "xem thêm lựa chọn khác" — tránh trùng lặp CTA.
         action = "Hãy ĐỀ XUẤT NGẮN GỌN 1-2 sản phẩm phù hợp nhất (chỉ nêu 2-3 điểm nổi bật nhất, tuyệt đối không liệt kê toàn bộ thông số dài dòng)."
     else:

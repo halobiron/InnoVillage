@@ -160,7 +160,7 @@ export default function App() {
               </svg>
             </div>
             <div>
-              <h1 className="brand-name">Điện Máy Xanh AI</h1>
+              <h1 className="brand-name">Chọn Đúng</h1>
               <span className="brand-status"><span className="status-dot" />Sẵn sàng tư vấn</span>
             </div>
           </div>
@@ -236,7 +236,7 @@ export default function App() {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Nhập nhu cầu tư vấn (VD: Tủ lạnh 4 người dưới 15 triệu, máy giặt sấy...)"
+              placeholder="Nhập nhu cầu (VD: kem đánh răng dưới 70k, nước giặt cho máy cửa trước...)"
               aria-label="Nội dung câu hỏi"
               autoFocus
             />

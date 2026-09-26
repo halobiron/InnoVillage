@@ -154,7 +154,7 @@ class IntentSchema(BaseModel):
     )
     clarification_questions: List[str] = Field(
         default_factory=list,
-        description="1-2 câu hỏi làm rõ lịch sự nếu needs_clarification là True."
+        description="Nếu needs_clarification=true, viết 1 câu hỏi tiếp nối tự nhiên, cụ thể theo sản phẩm/ngữ cảnh; đừng dùng lời hỏi chung chung kiểu biểu mẫu. Nếu đã rõ danh mục nhưng thiếu tiêu chí, hỏi nhẹ một ưu tiên hữu ích (chẳng hạn loại, thương hiệu hoặc tầm giá phù hợp với mặt hàng), có thể nói ngắn rằng vẫn có thể tự chọn gợi ý nếu khách chưa có ưu tiên. Không hỏi dồn nhiều tiêu chí trong một câu."
     )
 
 
@@ -199,7 +199,12 @@ def extract_intent(query: str, history: Optional[List[Dict[str, str]]] = None,
             "2 câu/60 từ và chuyển nhẹ về nhu cầu mua sắm.\n"
             "- Trích brand, ngân sách, ưu tiên; needs_custom_query=true cho ràng buộc thông số/xếp hạng, "
             "kể cả số người dùng. wants_comparison=true khi khách muốn nhiều lựa chọn. Chỉ needs_clarification "
-            "khi thiếu dữ kiện thật sự, hỏi 1-2 câu ngắn không lặp lại lịch sử; declines_more_info=true khi khách từ chối.\n"
+            "khi thiếu dữ kiện thật sự. Khi đã hiểu danh mục nhưng khách chưa nói tiêu chí, needs_clarification=true "
+            "và clarification_questions có đúng MỘT câu hỏi trò chuyện tự nhiên, gắn với mặt hàng cụ thể; hỏi một "
+            "ưu tiên dễ trả lời, không liệt kê hàng loạt tiêu chí, không mở đầu kiểu 'Với nhóm [danh mục]...' hay "
+            "'bạn ưu tiên mức giá hoặc đặc điểm nào?'. Có thể mời khách để mình tự chọn vài gợi ý nếu họ chưa có "
+            "ưu tiên. Trong trường hợp này để transition_message=null để tránh lặp lời dẫn. Chỉ dùng transition_message "
+            "khi phải chuyển từ mô tả vấn đề sang danh mục phù hợp. Không lặp lại lịch sử; declines_more_info=true khi khách từ chối.\n"
             "- Đồng thời trích customer_address, bot_self_term và addressing_confidence. Chỉ trả high khi khách tự "
             "xưng rõ ở ngôi thứ nhất (vd 'cô cần...', 'anh muốn...', 'ông cần...') hoặc nói thẳng cách muốn được gọi/xưng. "
             "Không suy tuổi, giới tính hay vai vế từ tên, sản phẩm, giọng văn, 'tôi/mình', hay khi khách gọi BOT "

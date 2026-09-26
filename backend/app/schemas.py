@@ -20,7 +20,7 @@ class FactCard(BaseModel):
     productidweb: str | None = None
     image_url: str | None = None
     product_link: str | None = None
-    stock_status: str | None = None      # "Còn hàng" / "Hết hàng" (cào từ dienmayxanh.com)
+    stock_status: str | None = None      # Tình trạng tồn kho nếu nguồn catalog cung cấp
     rating: float | None = None          # điểm đánh giá trung bình
     review_count: int | None = None      # số lượt đánh giá
     installment: str | None = None       # thông tin trả góp

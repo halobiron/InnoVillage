@@ -1,4 +1,4 @@
-# Chia việc 4 người & Lộ trình phát triển — Trợ lý AI Điện Máy Xanh
+# Chia việc 4 người & Lộ trình phát triển — Trợ lý AI Co.opSmile
 
 > Mục tiêu: 4 thành viên phát triển **song song, ít đụng nhau nhất**, tiếp tục từ MVP hiện tại (67 test xanh, đã chạy end-to-end với LLM thật).
 
@@ -48,7 +48,7 @@ Người dùng cuối
 
 **Hướng phát triển:**
 - **Adapter API thật** thay `loader.py`: catalog/price/promotion/stock của đối tác (thay dữ liệu tĩnh + lấp ~71% thiếu giá).
-- Thêm **ngành hàng mới** (điện thoại, laptop, máy lạnh — ví dụ trong đề nhưng chưa có trong data) — chỉ cần thêm `CategoryConfig`.
+- Mở rộng **nhóm hàng thiết yếu** từ catalog được phép dùng; chuẩn hoá danh mục chăm sóc cá nhân/nhà cửa trước khi thêm nguồn mới.
 - Vector DB (FAISS/pgvector), **learning-to-rank** theo hành vi, chuẩn hoá đơn vị nâng cao, ảnh/thumbnail sản phẩm.
 
 ---

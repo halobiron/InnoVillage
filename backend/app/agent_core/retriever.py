@@ -113,7 +113,7 @@ def score_product(prod: Dict[str, Any], query: str, priority_features: Optional[
     return score
 
 def category_table_for(category: str, db_path: Optional[str] = None) -> Optional[str]:
-    """Tên bảng thông số riêng của một danh mục (vd 'Tủ Lạnh' -> 'tu_lanh')."""
+    """Tên bảng riêng của một danh mục sản phẩm."""
     conn = sqlite3.connect(_resolve_db(db_path))
     try:
         row = conn.execute("SELECT DISTINCT category_table FROM all_products WHERE category = ?",

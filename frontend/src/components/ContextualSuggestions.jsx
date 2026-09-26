@@ -23,8 +23,8 @@ export default function ContextualSuggestions({ cards, onPick, disabled }) {
     message: `Cho tôi xem chi tiết thông số và tính năng của ${names[0]}`,
   })
   chips.push({
-    label: `${names[0]} có trả góp không?`,
-    message: `${names[0]} có hỗ trợ mua trả góp 0% không?`,
+    label: `Xem lựa chọn khác`,
+    message: `Cho tôi xem thêm sản phẩm tương tự với ${names[0]}`,
   })
 
   return (

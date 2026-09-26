@@ -224,7 +224,7 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
                   rel="noopener noreferrer"
                   className="btn-primary full-width"
                 >
-                  Xem tại dienmayxanh.com &rarr;
+                  Xem trong catalog Co.opSmile &rarr;
                 </a>
               </div>
             )}

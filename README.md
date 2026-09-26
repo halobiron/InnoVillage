@@ -1,11 +1,10 @@
-# Trợ lý AI bán hàng điện máy — "Super-Salesperson" cho Điện Máy Xanh
+# Trợ lý AI tư vấn hàng tiêu dùng thiết yếu — Co.opSmile
 
 > **Vietnam Innovation Challenge 2026 · Track 🏢 Năng suất SME**
-> Bài toán do **Công ty Cổ phần Đầu tư Điện Máy Xanh** (dienmayxanh.com) đặt ra:
-> *"Trợ lý AI so sánh và tư vấn sản phẩm theo nhu cầu thật của khách hàng."*
+> MVP demo dùng catalog công khai của **Co.opSmile** cho nhóm chăm sóc cá nhân và chăm sóc nhà cửa.
 ---
 
-**Trợ lý ảo bán hàng điện máy thế hệ mới** là hệ thống tư vấn bán hàng thông minh chạy trên nền tảng Web, đóng vai trò như một **"Super-salesperson"** – nhân viên bán hàng xuất sắc nhất của doanh nghiệp – có khả năng tư vấn cá nhân hóa đồng thời cho hàng nghìn khách hàng, hoạt động liên tục 24/7.
+**Trợ lý AI Co.opSmile** tư vấn các mặt hàng thiết yếu như kem đánh răng, bàn chải, dầu gội, sữa tắm, nước giặt và nước rửa chén trên nền tảng Web.
 
 Hệ thống hiểu tiếng Việt đời thường, biết **chủ động hỏi ngược** đúng những câu hỏi quan trọng để nắm nhu cầu thực sự của khách, từ đó đề xuất **top-3 sản phẩm phù hợp nhất** kèm phân tích đánh đổi (trade-off) bằng ngôn ngữ bình dân, dễ hiểu. Đặc biệt, hệ thống cam kết **không bịa số liệu (Zero-Hallucination)** – mọi thông tin đưa ra đều bám sát dữ liệu sản phẩm thực tế.
 
@@ -13,13 +12,13 @@ Hệ thống hiểu tiếng Việt đời thường, biết **chủ động hỏ
 
 ---
 
-Đây là bản MVP chạy end-to-end (backend FastAPI + frontend React), xây trên **đúng bộ dữ liệu đề bài cấp** — không dùng dữ liệu mẫu tự chế.
+Đây là MVP end-to-end (backend FastAPI + frontend React), dùng snapshot catalog online và danh sách cửa hàng công khai. Catalog hiện không có tồn kho theo chi nhánh.
 
 ---
 
 ## Mục lục
 
-- [Trợ lý AI bán hàng điện máy — "Super-Salesperson" cho Điện Máy Xanh](#trợ-lý-ai-bán-hàng-điện-máy--super-salesperson-cho-điện-máy-xanh)
+- [Trợ lý AI tư vấn hàng tiêu dùng thiết yếu — Co.opSmile](#trợ-lý-ai-tư-vấn-hàng-tiêu-dùng-thiết-yếu--coopsmile)
   - [Mục lục](#mục-lục)
   - [1. Bối cảnh \& bài toán](#1-bối-cảnh--bài-toán)
   - [2. Giải pháp: Trợ lý bán hàng khép kín \& toàn diện](#2-giải-pháp-trợ-lý-bán-hàng-khép-kín--toàn-diện)
@@ -45,11 +44,11 @@ Hệ thống hiểu tiếng Việt đời thường, biết **chủ động hỏ
 
 ## 1. Bối cảnh & bài toán
 
-Khi mua điện thoại, máy lạnh, tủ lạnh hay bất kì sản phẩm điện máy nào, khách hàng phổ thông **không cần hiểu rõ bảng thông số** — họ cần biết sản phẩm nào *hợp với hoàn cảnh của mình*: ngân sách bao nhiêu, dùng cho ai, phòng bao nhiêu m², ưu tiên tiết kiệm điện hay hiệu năng. Nhưng phần lớn công cụ hiện nay chỉ liệt kê công suất, dung tích, RAM, BTU… cạnh nhau, khiến khách khó hiểu và khó quyết định.
+Khi mua hàng thiết yếu, khách thường cần chọn đúng loại sản phẩm, thương hiệu, quy cách và mức giá. Catalog và bộ lọc khô khan buộc khách tự đối chiếu nhiều lựa chọn; trợ lý giúp tìm sản phẩm phù hợp với nhu cầu nêu bằng tiếng Việt tự nhiên.
 
 | | Hiện trạng | Hệ quả |
 |---|---|---|
-| **Bộ lọc & bảng so sánh** (TGDĐ/ĐMX) | Bắt khách tự hiểu kỹ thuật | Khách phổ thông bỏ cuộc |
+| **Bộ lọc & bảng so sánh** | Bắt khách tự đối chiếu nhiều lựa chọn | Khách phổ thông bỏ cuộc |
 | **Chatbot FAQ / kịch bản** | Trả lời một chiều, thụ động | Không khai thác được nhu cầu thật |
 | **Hỏi thẳng ChatGPT/Gemini** | Dễ "ảo tưởng", bịa giá/thông số | Thảm hoạ vận hành cho nhà bán lẻ |
 
@@ -58,7 +57,7 @@ Khi mua điện thoại, máy lạnh, tủ lạnh hay bất kì sản phẩm đi
 
 **Đối tượng phục vụ (hai nhóm trong một chuỗi giá trị):**
 - **Người mua sắm phổ thông** — không rành công nghệ, chỉ biết mô tả hoàn cảnh ("mua cho ba mẹ ở quê", "phòng trọ hay cúp điện", "tầm 7 triệu"). Bot dịch hoàn cảnh đó thành lựa chọn phù hợp.
-- **Nhà bán lẻ điện máy** (khách trả tiền) — tăng tỷ lệ chuyển đổi từ traffic sẵn có, giảm tải chăm sóc, và thu được dữ liệu hội thoại để hiểu khách thật sự cần gì.
+- **Nhà bán lẻ** — hỗ trợ tra cứu danh mục, giá niêm yết và thông tin sản phẩm.
 
 ---
 
@@ -66,27 +65,27 @@ Khi mua điện thoại, máy lạnh, tủ lạnh hay bất kì sản phẩm đi
 
 Hệ thống mô phỏng tư duy của một **"super-salesperson"** — không chỉ tìm sản phẩm, mà **bán hàng có trách nhiệm** trên toàn bộ hành trình khách hàng, từ tư vấn đến sau mua:
 
-* 🗣️ **Thấu hiểu tiếng Việt đời thường** — xử lý mượt câu không dấu, sai chính tả, viết tắt, teencode, từ địa phương và trộn Anh-Việt (code-switching); tự động chuẩn hóa & quy đổi đơn vị thực tế (phòng 20m², "máy lạnh 1 ngựa/HP", BTU, inch, lít) — khách mô tả hoàn cảnh, hệ thống lo phần thông số, thay vì bắt khách tự lọc bộ lọc kỹ thuật khô khan.
+* 🗣️ **Thấu hiểu tiếng Việt đời thường** — xử lý câu không dấu, viết tắt và cách gọi quen thuộc; trích thương hiệu, loại hàng, quy cách và ngân sách.
 
 * 🔎 **Chủ động hội thoại & khắc họa chân dung khách hàng (Customer Profiling)** — nếu thiếu thông tin quyết định, bot hỏi ngược **từng câu một, câu quan trọng trước**; đồng thời phân tích nhân khẩu học (độ tuổi, giới tính, nghề nghiệp...) qua tương tác để xây dựng chân dung khách, từ đó cá nhân hóa chuỗi câu hỏi tiếp theo nhằm khai thác đúng nhu cầu thực. Những gì khách chưa nói được ghi nhận là "chưa biết" — **không tự đoán**.
 
-* 📊 **Tư vấn minh bạch bằng kiến trúc RAG** — truy xuất **real-time** thông số, giá bán, khuyến mãi và tồn kho thật từ Catalog/API; đề xuất **top-3 sản phẩm tối ưu**, phân tích rõ điểm đánh đổi (trade-off) bằng ngôn ngữ bình dân, và chỉ thẳng sản phẩm nào **không nên chọn** (why-not).
+* 📊 **Tư vấn minh bạch bằng kiến trúc RAG** — truy xuất tên, giá online và quy cách từ snapshot catalog; đề xuất tối đa **3 sản phẩm**, phân tích khác biệt và nêu rõ phần dữ liệu còn thiếu.
 
 * 🛡️ **Cam kết Zero-Hallucination** — mọi con số đều gắn nguồn trích xuất, được **log kiểm chứng**; thiếu dữ liệu thì nói thẳng "chưa có thông tin", **không bao giờ bịa** — chống ảo giác bằng kiến trúc, không bằng lời hứa.
 
-* 🛒 **Bán chéo thông minh (Cross-selling)** — ngay khi khách chốt sản phẩm, bot dựa vào dữ liệu sản phẩm đi kèm để gợi mở nhu cầu mới (ví dụ: ưu đãi mua kèm tai nghe, ốp lưng khi chốt điện thoại) và chủ động đề xuất **giải pháp mua sắm trọn gói**, tăng giá trị đơn hàng.
+* 🛒 **Gợi ý có căn cứ** — chỉ gợi ý mặt hàng có trong catalog; không tự tạo combo hay ưu đãi.
 
 * 🧭 **Gợi mở & điều hướng hành động sau tư vấn (Next-Best-Action)** — sau khi trình top-3, bot không dừng ở "đây là danh sách, khách tự lo tiếp" mà chủ động chốt bước kế tiếp như một nhân viên thật: **đặt hàng hộ** ngay trong hội thoại (tạo đơn nháp, xác nhận thông tin giao nhận), **lưu ghi chú / sản phẩm quan tâm** để khách quay lại quyết sau mà không phải tư vấn lại từ đầu, hoặc **chỉ cửa hàng gần nhất còn hàng** để khách qua trải nghiệm trực tiếp — rút ngắn tối đa khoảng cách từ *"được tư vấn"* đến *"chốt đơn"*.
 
-* 🔄 **Thuyết phục & xử lý hết hàng (Out-of-Stock Handling)** — khi sản phẩm khách tìm không có sẵn, bot đóng vai nhân viên tư vấn khéo léo: **thẳng thắn thừa nhận thiếu hàng**, rồi lập tức phân tích và giới thiệu sản phẩm tương đương cùng mục đích sử dụng để thuyết phục khách chuyển đổi.
+* 🔄 **Xử lý mặt hàng ngoài catalog** — nói rõ khi chưa có mặt hàng phù hợp; không kết luận còn/hết hàng tại chi nhánh vì snapshot không có tồn kho.
 
-* 💬 **Chăm sóc khách hàng sau mua** — với shop có lưu lịch sử mua hàng, bot kiêm luôn vai trò CSKH cơ bản: trả lời về thời hạn bảo hành, chính sách ưu đãi và các quyền lợi liên quan.
+* 💬 **Hỗ trợ sau mua cơ bản** — chỉ trả lời chính sách khi có tài liệu nguồn; catalog hiện không chứa lịch sử đơn hàng hay tồn kho chi nhánh.
 
 ### 🎯 Điểm khác biệt cốt lõi
 
 * **Đảo ngược quy trình tư vấn** — khách không cần biết kỹ thuật, chỉ cần mô tả hoàn cảnh (*"phòng 20m², sợ tốn điện"*); hệ thống tự quy đổi sang thông số. Chatbot thường bắt khách hiểu máy — chúng tôi bắt máy hiểu khách.
 
-* **Hyper-Localization** — hiểu tiếng Việt như người Việt nhắn tin thật: không dấu, teencode, vùng miền, dân gian ("máy lạnh", "1 ngựa"), trộn Anh-Việt.
+* **Hiểu cách nhắn tin tự nhiên** — hỗ trợ tiếng Việt có dấu/không dấu và cách gọi quen thuộc của mặt hàng.
 
 * **Zero-Hallucination bằng kiến trúc, không bằng lời hứa** — RAG + guardrail fail-closed 3 lớp: không có nguồn kiểm chứng thì *bị chặn* trả lời, nói thẳng "chưa có dữ liệu". Mọi con số đều truy vết được qua log.
 
@@ -139,11 +138,11 @@ Toàn bộ trạng thái hội thoại được lưu qua `MemorySaver` trên SQL
 Đồ thị này cũng được thiết kế **mở về phía sau**: sau `verify_node`, kiến trúc cho phép nối thêm nhánh **`next_action`** — gợi mở bước kế tiếp cho khách sau khi xem top-3 (đặt hàng hộ, lưu ghi chú sản phẩm quan tâm, tìm cửa hàng gần còn hàng) — chỉ bằng cách thêm node vào `StateGraph`, không phải viết lại luồng. Phần này thuộc [lộ trình mục 10](#10-cơ-hội--lộ-trình-tương-lai).
 
 ### Ví dụ một lượt hội thoại thật
-> **Khách:** *"e muon mua may lanh duoi 20tr cho phong 18m2, tiet kiem dien, it on"*
-> → Bot hiểu: cần **máy lạnh** · ngân sách **≤ 20 triệu** · phòng **18m²** · ưu tiên **tiết kiệm điện, ít ồn** — dù câu không dấu, viết tắt.
+> **Khách:** *"mình cần kem đánh răng dưới 70k với nước súc miệng"*
+> → Bot hiểu: cần **chăm sóc cá nhân** · ngân sách **≤ 70.000đ** · ưu tiên kem đánh răng và nước súc miệng.
 >
 > **Bot (hỏi ngược đúng chỗ):** *"Dạ phòng 18m² này là phòng ngủ hay phòng khách ạ?"*
-> → Sau khi đủ thông tin: đề xuất **top-3** kèm trade-off ("êm nhất nhưng đắt nhất" / "cân bằng" / "rẻ hơn hẳn nhưng bảo hành ngắn"), **giải thích cả vì sao loại** nhóm non-inverter, và mỗi con số đều bấm xem được nguồn.
+> → Sau khi đủ thông tin: đề xuất tối đa **3 mặt hàng** kèm khác biệt về thương hiệu, quy cách và giá; mỗi con số đều gắn nguồn catalog.
 
 Lượt hội thoại trên đi qua đúng các nhánh của đồ thị: `intent` bóc tách được 4 ràng buộc từ một câu không dấu → `clarify` phát hiện thiếu thông tin công năng phòng và chỉ hỏi **đúng 1 câu** → khi đủ dữ kiện, nhánh chính `retrieval → advisor → compare → verify` chạy trọn vẹn và trả về đề xuất có nguồn kiểm chứng qua **SourcePanel "Vì sao em đề xuất?"**.
 
@@ -162,8 +161,8 @@ Các tính năng dưới đây **đã hiện thực hoá và có test bao phủ*
 | 5 | **RAG có cấu trúc** | Truy vấn SQLite theo ngành hàng, ngân sách và thông số; kết quả được chuẩn hoá trước khi tư vấn | `app/agent_core/retriever.py` |
 | 6 | **Top-3 + trade-off + why-not** | 3 sản phẩm đa dạng brand/giá, phân tích đánh đổi, **chỉ rõ nhóm không nên chọn** | `agent_core/advisor.py` |
 | 7 | **Bảng so sánh trực quan** | Đặt cạnh nhau các tiêu chí khách quan tâm | `agent_core/compare.py`, `frontend/.../ComparisonTable.jsx` |
-| 8 | **"Vì sao em đề xuất máy này?"** | Panel nguồn: mỗi con số ghi rõ *(giá từ catalog / thông số nhà sản xuất)* + liệt kê cả thứ **chưa có dữ liệu** | `app/advice/provenance.py`, `SourcePanel.jsx` |
-| 9 | **Nói thẳng khi thiếu dữ liệu** | Tồn kho / review / trả góp không có trong data → **luôn** trả lời "chưa có dữ liệu" | guardrail (mục 5) |
+| 8 | **"Vì sao em đề xuất sản phẩm này?"** | Panel nguồn: giá từ catalog, quy cách đã ghi nhận và thứ **chưa có dữ liệu** | `app/advice/provenance.py`, `SourcePanel.jsx` |
+| 9 | **Nói thẳng khi thiếu dữ liệu** | Tồn kho theo chi nhánh / review không có trong snapshot → trả lời "chưa có dữ liệu" | guardrail (mục 5) |
 | 10 | **Streaming câu trả lời (SSE)** | `status` theo tiến trình + phát **từng dòng đã kiểm chứng grounding** ngay khi LLM viết xong | `app/main.py` `/api/chat/stream`, `advisor.py` |
 | 11 | **Hội thoại nhiều lượt, PII-safe** | Nhớ ngữ cảnh qua `MemorySaver`; **không log nội dung khách** | `app/agent_core/engine.py` |
 
@@ -192,24 +191,12 @@ Các tình huống bịa số được kiểm tra bằng unit test; với **stre
 
 ## 6. Dữ liệu & phạm vi
 
-Hệ thống tư vấn dựa trên **đúng bộ dữ liệu sản phẩm mà đề bài cung cấp** — không dùng dữ liệu mẫu tự chế. Toàn bộ bảng thông số gốc (file Excel) được làm sạch và đưa vào một cơ sở dữ liệu nội bộ (`products.db`) để bot tra cứu, gồm **8.746 sản phẩm · 14 ngành hàng · 129 thương hiệu**:
+Runtime catalog `backend/app/agent_core/products.db` được dựng từ snapshot catalog online Co.opSmile trong `data/coopsmile_catalog.json`:
 
-| Ngành hàng | Số sản phẩm | Có giá | Ngành hàng | Số sản phẩm | Có giá |
-|---|---:|---:|---|---:|---:|
-| Tủ lạnh | 1.692 | 252 | Máy nước nóng | 319 | 148 |
-| Máy tính bảng | 1.469 | 307 | Tủ mát, tủ đông | 222 | 132 |
-| Máy giặt | 1.337 | 204 | Máy in | 147 | 57 |
-| Đồng hồ thông minh | 1.336 | 582 | Máy rửa chén | 134 | 59 |
-| Máy lạnh | 1.039 | 269 | Máy sấy quần áo | 107 | 38 |
-| Màn hình máy tính | 469 | 68 | Micro karaoke | 37 | 5 |
-| Máy tính để bàn | 405 | 77 | Micro thu âm | 33 | 24 |
-| | | | **Tổng** | **8.746** | **2.222 (~25%)** |
-
-**Dữ liệu thật vốn không hoàn hảo — và hệ thống xử lý điều đó một cách trung thực thay vì che giấu** (đúng điều đề bài dặn tránh):
-
-- **Khoảng 75% sản phẩm không có thông tin giá.** Với những sản phẩm này, bot ghi nhận rõ *"chưa có dữ liệu giá"* và **không đưa vào danh sách xếp hạng theo ngân sách** — tuyệt đối không tự chế ra một mức giá "nghe hợp lý".
-- **Dữ liệu gốc không có thông tin tồn kho, đánh giá của người mua, hay chính sách trả góp.** Vì vậy khi khách hỏi những nội dung này, bot **luôn trả lời thẳng "chưa có dữ liệu"** thay vì đoán.
-- **Dữ liệu gốc khá lộn xộn:** thông số và đơn vị bị viết dính vào nhau trong ô chữ ("313 lít", "1720W - 2050W"), nhiều ô bỏ trống không theo quy luật, thậm chí không có cột tên sản phẩm riêng (hệ thống phải tự ghép tên từ thương hiệu + thông số nổi bật). Toàn bộ những rắc rối này được xử lý ngay ở bước nạp và chuẩn hóa dữ liệu, để các bước tư vấn phía sau luôn làm việc trên dữ liệu sạch.
+- **36 sản phẩm** thuộc hai nhóm **Chăm sóc cá nhân** và **Chăm sóc nhà cửa**.
+- **94 địa chỉ cửa hàng** được lấy từ trang hệ thống cửa hàng và lưu trong bảng `store_locations`.
+- Giá là giá online tại thời điểm lấy snapshot; dữ liệu **không xác nhận tồn kho hoặc giá tại từng chi nhánh**.
+- Dựng lại SQLite từ snapshot đã lưu bằng `python scripts/import_coopsmile_snapshot.py` trong thư mục `backend`.
 
 ---
 
@@ -242,8 +229,9 @@ cd backend
 python -m venv .venv
 ./.venv/Scripts/pip install -r requirements.txt
 
-# products.db (luồng agent_core) đã đi kèm repo. Muốn build lại từ spec sheet:
-#   ./.venv/Scripts/python -m app.agent_core.data_ingestion   # đọc Spec_cate_gia.cleaned.xlsx
+# products.db (catalog Co.opSmile) đã đi kèm repo. Dựng lại từ snapshot:
+./.venv/Scripts/python scripts/import_coopsmile_snapshot.py
+./.venv/Scripts/python scripts/gen_db_schema_md.py
 
 cp .env.example .env
 # điền b.ai API key vào LLM_API_KEY (mặc định: deepseek-v4-flash)
@@ -310,9 +298,9 @@ MVP hiện dừng ở khâu **tư vấn / đề xuất top-3**. Kiến trúc đ�
   - **Đặt hàng hộ trong hội thoại** — tạo đơn nháp qua API đơn hàng của nhà bán lẻ, bot thu thập & xác nhận thông tin giao nhận từng bước; đơn chỉ được chốt khi khách xác nhận rõ ràng (human-confirm, không tự ý đặt).
   - **Ghi chú & lưu sản phẩm quan tâm** — khách "để em suy nghĩ thêm" → bot lưu shortlist kèm ghi chú lý do chọn/băn khoăn vào phiên (thiết kế lưu trữ có PII-consent); lần quay lại, bot mở đúng ngữ cảnh cũ thay vì tư vấn lại từ đầu.
   - **Tìm cửa hàng gần còn hàng** — tích hợp store-locator + tồn kho theo chi nhánh: khách muốn "xem tận mắt" → bot chỉ chi nhánh gần nhất **có sẵn đúng model đề xuất**, kèm giờ mở cửa; dữ liệu tồn kho vẫn đi qua guardrail gắn-nguồn, không có dữ liệu thì nói thẳng.
-- **Bán chéo thông minh (cross-sell)** — sau khi khách chốt sản phẩm, gợi mở phụ kiện/dịch vụ đi kèm ("mua điện thoại → tai nghe, ốp lưng"; "mua tủ lạnh → gói vệ sinh định kỳ"), vẫn theo nguyên tắc không bịa khuyến mãi phụ kiện.
+- **Bán chéo có dữ liệu** — chỉ bật khi catalog có cặp sản phẩm mua kèm được xác nhận.
 - **Xử lý hết hàng (out-of-stock) → thuyết phục chuyển đổi** — khi sản phẩm khách tìm không còn, thẳng thắn thừa nhận rồi giới thiệu sản phẩm tương đương cùng mục đích (nền tảng `unsupported_node` đã có sẵn để nâng cấp).
-- **Chăm sóc sau mua** — lưu lịch sử mua hàng (thiết kế lưu trữ có PII-consent), trả lời câu hỏi hậu mãi: bảo hành, hướng dẫn dùng, chính sách ưu đãi.
+- **Chăm sóc sau mua** — chỉ trả lời câu hỏi hậu mãi khi có tài liệu Co.opSmile được xác minh.
 
 ### 🧠 Hiểu khách sâu hơn
 - **Persona-driven questioning** — suy luận chân dung khách (độ tuổi, nghề, hoàn cảnh) và điều chỉnh chuỗi câu hỏi tiếp theo theo từng đối tượng.

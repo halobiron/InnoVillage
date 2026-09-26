@@ -1,6 +1,6 @@
 # EMX Advisor — Frontend
 
-Giao diện chat tư vấn sản phẩm **Trợ lý AI Điện Máy Xanh**. Single-page app dạng chatbot: người dùng nhắn tin, bot trả lời kèm thẻ đề xuất sản phẩm có trích nguồn dữ liệu.
+Giao diện chat tư vấn hàng thiết yếu **Trợ lý AI Co.opSmile**. Người dùng nhắn tin, bot trả lời kèm thẻ sản phẩm và nguồn catalog.
 
 - **Cập nhật lần cuối:** 18/07/2026
 - **Package:** `emx-advisor-frontend` v0.1.0
@@ -76,7 +76,7 @@ setMessages([...]) ──► render <Message> (bubble + cards + warnings + assum
 ### `POST /api/chat`
 ```jsonc
 // Request
-{ "session_id": "demo-abc123", "message": "mua tủ lạnh dưới 20tr" }
+{ "session_id": "demo-abc123", "message": "kem đánh răng dưới 70 nghìn" }
 
 // Response
 {

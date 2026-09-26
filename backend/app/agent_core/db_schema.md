@@ -1,12 +1,12 @@
 # Schema CSDL products.db (SQLite) — SINH TỰ ĐỘNG bởi scripts/gen_db_schema_md.py
 
-## Quy tắc đọc (quan trọng)
-- `all_products`: 1 dòng = 1 sản phẩm (SKU), gộp mọi ngành. Cột `id` là khoá DUY NHẤT của dòng.
-- `model_code` KHÔNG duy nhất (nhiều biến thể chung một mã) — không dùng làm khoá nhận diện.
-- Giá bán (VND) là `price_clean`; giá trị 0/NULL nghĩa là CHƯA CÓ DỮ LIỆU giá, không phải miễn phí — muốn lọc/xếp theo giá phải kèm `price_clean > 0`.
-- Mỗi ngành có bảng thông số riêng (1 dòng = 1 sản phẩm), JOIN với all_products qua `model_code`.
-- Cột thông số là TEXT thường kèm đơn vị (vd '313 lít', '27 inch') — so sánh số bằng `CAST("tên cột" AS REAL)` (SQLite lấy phần số đứng đầu chuỗi).
-- Tên cột tiếng Việt/có khoảng trắng phải bọc trong nháy kép: `"Dung tích tổng"`.
+## Quy tắc đọc
+- `all_products`: một dòng cho mỗi mặt hàng trong snapshot catalog Co.opSmile.
+- `sku` là mã nội bộ ổn định của snapshot; đây không phải mã barcode của nhà bán lẻ.
+- Giá VND nằm trong `price_clean`; giá chỉ là catalog online tại ngày `retrieved_at`.
+- Catalog không chứa tồn kho theo chi nhánh. `store_locations` chỉ có danh sách địa chỉ công khai.
+- Bảng danh mục có thể JOIN với `all_products` qua `sku`.
+- Tên cột tiếng Việt/có khoảng trắng phải bọc trong nháy kép.
 
 
 ## Bảng all_products (mọi ngành) (36 dòng)

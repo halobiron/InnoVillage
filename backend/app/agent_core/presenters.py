@@ -68,51 +68,12 @@ def _normalize_pid(raw: Any) -> str | None:
 
 
 def _lookup_web_meta(row: Dict[str, Any]) -> Dict[str, Any]:
-    """Lấy productidweb + link/ảnh/rating đã cào sẵn từ bảng danh mục trong products.db.
-
-    DB là nguồn chính (prod không gọi được dienmayxanh.com); chỉ khi DB thiếu
-    link/ảnh mới fallback cào trực tiếp."""
+    """Trả liên kết catalog đã lưu cùng sản phẩm; không gọi một crawler bán lẻ khác."""
     meta: Dict[str, Any] = {"productidweb": _normalize_pid(row.get("productidweb")),
                             "link": None, "image": None, "rating": None}
-    table_name = row.get("category_table")
-    sku = row.get("sku")
-    model_code = row.get("model_code")
-    if table_name and (sku or model_code):
-        import sqlite3
-        from app.config import get_settings
-        try:
-            conn = sqlite3.connect(get_settings().agent_db_path)
-            cursor = conn.cursor()
-            select = (f'SELECT productidweb, "url (crawl)", "ảnh (crawl)", "rating (crawl)" '
-                      f'FROM {table_name}')
-            row_db = None
-            if sku:
-                cursor.execute(f"{select} WHERE sku = ?", (sku,))
-                row_db = cursor.fetchone()
-            if (row_db is None or row_db[0] is None) and model_code:
-                cursor.execute(f"{select} WHERE model_code = ?", (model_code,))
-                row_db = cursor.fetchone()
-            conn.close()
-            if row_db:
-                meta["productidweb"] = meta["productidweb"] or _normalize_pid(row_db[0])
-                link, image, rating = row_db[1], row_db[2], row_db[3]
-                if link and str(link).startswith("http"):
-                    meta["link"] = str(link)
-                if image and str(image).startswith("http"):
-                    meta["image"] = str(image)
-                try:
-                    if rating is not None and str(rating).strip() not in ("", "nan"):
-                        meta["rating"] = float(rating)
-                except (ValueError, TypeError):
-                    pass
-        except Exception:
-            pass
-
-    if meta["productidweb"] and not (meta["link"] and meta["image"]):
-        from app.advice.crawler import fetch_product_info
-        link, image = fetch_product_info(meta["productidweb"])
-        meta["link"] = meta["link"] or link
-        meta["image"] = meta["image"] or image
+    url = row.get("url")
+    if isinstance(url, str) and url.startswith("https://"):
+        meta["link"] = url
     return meta
 
 
@@ -165,8 +126,6 @@ def build_reco_card(row: Dict[str, Any], priority_features: List[str], self_term
     card = FactCard(title=f"Lý do đề xuất {name}", lines=lines, missing=missing,
                     productidweb=meta["productidweb"], image_url=meta["image"],
                     product_link=meta["link"])
-    from app.advice.crawler import enrich_card_with_detail
-    enrich_card_with_detail(card)
     _apply_db_rating(card, meta["rating"])
     return card
 
@@ -195,7 +154,5 @@ def build_detail_card(row: Dict[str, Any]) -> FactCard:
     card = FactCard(title=f"Thông tin chi tiết: {name}", lines=lines, missing=missing,
                     productidweb=meta["productidweb"], image_url=meta["image"],
                     product_link=meta["link"])
-    from app.advice.crawler import enrich_card_with_detail
-    enrich_card_with_detail(card)
     _apply_db_rating(card, meta["rating"])
     return card

@@ -56,36 +56,22 @@ def _load_schema_md() -> Optional[str]:
 
 
 def schema_for_prompt(db_path: Optional[str] = None, category_table: Optional[str] = None) -> str:
-    """Mô tả schema cho AI, ưu tiên file db_schema.md (sinh bởi scripts/gen_db_schema_md.py).
-
-    Đã rõ ngành -> chỉ chèn phần quy tắc + all_products + bảng ngành đó (tiết kiệm token);
-    chưa rõ ngành -> chèn cả file. Không có file -> tự dựng tối thiểu từ PRAGMA."""
-    md = _load_schema_md()
-    if md:
-        if category_table:
-            sections = md.split("\n## ")
-            keep = [sections[0]]  # phần quy tắc đầu file
-            for sec in sections[1:]:
-                if sec.startswith("Bảng all_products") or f'"{category_table}"' in sec.split("\n", 1)[0]:
-                    keep.append("## " + sec)
-            return "\n".join(keep)
-        return md
-    # Đường lui khi chưa sinh file md: dựng tối thiểu từ PRAGMA.
+    """Đọc schema đang chạy trực tiếp từ SQLite để tránh prompt lệch snapshot cũ."""
     db = _resolve_db(db_path)
     conn = sqlite3.connect(db)
     try:
-        main_cols = [r[1] for r in conn.execute("PRAGMA table_info(all_products)")]
-        lines = [f"Bảng all_products (mọi ngành, 1 dòng = 1 sản phẩm): {', '.join(main_cols)}"]
-        if category_table and category_table in list_tables(db):
-            cols = [r[1] for r in conn.execute(f'PRAGMA table_info("{category_table}")')]
-            lines.append(f'Bảng "{category_table}" (thông số riêng ngành, 1 dòng = 1 sản phẩm): '
-                         + ", ".join(f'"{c}"' for c in cols))
+        tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        selected = ["all_products"] if "all_products" in tables else []
+        if category_table and category_table in tables and category_table not in selected:
+            selected.append(category_table)
+        lines = ["Schema SQLite hiện tại (dùng đúng tên bảng/cột bên dưới):"]
+        for table in selected:
+            cols = [r[1] for r in conn.execute(f'PRAGMA table_info("{table}")')]
+            lines.append(f'Bảng "{table}": ' + ", ".join(f'"{c}"' for c in cols))
     finally:
         conn.close()
-    lines.append(
-        "Giá bán (VND) là cột price_clean của all_products (0/NULL = chưa có giá). "
-        "Cột thông số là text kèm đơn vị (vd '313 lít', '27 inch') — so sánh số bằng "
-        'CAST("tên cột" AS REAL); tên cột tiếng Việt phải đặt trong nháy kép.')
+    lines.append('Giá catalog (VND) là "price_clean" của all_products; 0/NULL là chưa có giá. '
+                 'Tên cột tiếng Việt/có khoảng trắng phải đặt trong nháy kép.')
     return "\n".join(lines)
 
 
@@ -142,6 +128,11 @@ def agent_query(llm, user_query: str, intent: Dict[str, Any],
         "- Kết quả PHẢI có cột model_code (an toàn nhất: SELECT *). KHÔNG GROUP BY/tính gộp.\n"
         "- Cần xếp theo giá thì lọc price_clean > 0 trước (0/NULL là chưa có giá, không phải miễn phí).\n"
         "- Không bịa tên bảng/cột ngoài schema ở trên.\n"
+        "- Với truy vấn theo danh mục, giá, thương hiệu hoặc tên sản phẩm, ưu tiên bảng all_products "
+        "và chỉ dùng các cột thực sự được liệt kê trong schema (thường gồm category/price_clean/brand/product_name/key_specs_summary/full_specs_json). "
+        "Không lọc category hay thông số trên bảng ngành nếu schema không có cột đó.\n"
+        "- Bảng ngành chỉ chứa các cột được liệt kê riêng; chỉ JOIN khi khách hỏi thông số thực sự có trong bảng đó. "
+        "JOIN bằng sku và vẫn trả về model_code.\n"
         "- TUYỆT ĐỐI không nới ngân sách hay ràng buộc khách đã nêu; nếu vì thế mà không có "
         "sản phẩm nào thì chấp nhận trả 0 dòng (hệ thống sẽ tự xử lý phần tư vấn nới ngân sách).\n"
         "- Nếu khách yêu cầu 'càng rẻ càng tốt', 'rẻ nhất' hoặc 'giá rẻ', BẮT BUỘC thêm mệnh đề ORDER BY price_clean ASC."

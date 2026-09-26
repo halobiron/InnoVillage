@@ -1,10 +1,10 @@
-# Lộ trình Pilot — Trợ lý AI tư vấn Điện Máy Xanh
+# Lộ trình Pilot — Trợ lý AI tư vấn Co.opSmile
 
 *(D3 — bám khung 3 tháng theo đề bài VAIC 2026)*
 
 ## 1. Quy mô & mục tiêu pilot
 
-- **Phạm vi:** 1 nhóm ngành hàng duy nhất cho đợt pilot đầu (đề xuất **Tủ lạnh** — nhóm SKU lớn nhất trong Dataset, 1.692 sản phẩm, đã có đủ dữ liệu spec để test độ phủ retrieval), triển khai tại một số cửa hàng/kênh online thí điểm thay vì rollout toàn hệ thống.
+- **Phạm vi:** catalog demo tập trung vào **chăm sóc cá nhân** và **chăm sóc nhà cửa** (kem đánh răng, dầu gội, sữa tắm, nước giặt, nước rửa chén); dữ liệu lấy từ catalog online Co.opSmile.
 - **Khối lượng hội thoại mục tiêu:** 1.000–10.000 hội thoại thật trong suốt pilot, tăng dần theo 3 giai đoạn (xem mục 2), đủ để có tín hiệu thống kê về `category_acc`, `pref_recall`, `hallucination_rate` trên dữ liệu thật thay vì chỉ tập `eval/scenarios.jsonl` nội bộ.
 - **Thời lượng:** 3 tháng, chia 3 giai đoạn 1 tháng/giai đoạn.
 
@@ -13,18 +13,18 @@
 | Giai đoạn | Thời gian | Nội dung | Ngưỡng thoát (gate) |
 |---|---|---|---|
 | **Giai đoạn 1 — Shadow / nội bộ** | Tháng 1 | Chạy song song với tư vấn viên thật (không hiển thị cho khách), đối chiếu đề xuất của bot với lựa chọn thật của khách/nhân viên; vá NLU và `category_config` theo lỗi thực tế phát sinh (câu nói địa phương, viết tắt mới chưa có trong `pref_lexicon`/`ask_slots`) | `hallucination_rate = 0.0` trên toàn bộ log shadow; `category_acc ≥ 0.9` |
-| **Giai đoạn 2 — Pilot có kiểm soát** | Tháng 2 | Bật cho một nhóm khách hàng thật (vd khách truy cập trang tủ lạnh trên 1 kênh chỉ định), ~1.000–3.000 hội thoại, có nút phản hồi "đề xuất có hữu ích không" | Tỉ lệ hội thoại có ít nhất 1 warning "số chưa truy được nguồn" bị verifier chặn = 0 (guardrail không để lọt); tỉ lệ phản hồi hữu ích ≥ ngưỡng thoả thuận với đối tác |
+| **Giai đoạn 2 — Pilot có kiểm soát** | Tháng 2 | Bật cho nhóm khách đang tìm hàng chăm sóc cá nhân/nhà cửa trên kênh chỉ định, có nút phản hồi "đề xuất có hữu ích không" | Tỉ lệ hội thoại có ít nhất 1 warning "số chưa truy được nguồn" bị verifier chặn = 0; tỉ lệ phản hồi hữu ích ≥ ngưỡng thoả thuận với đối tác |
 | **Giai đoạn 3 — Mở rộng quy mô** | Tháng 3 | Mở rộng lên 10.000 hội thoại, tích hợp API thật (mục 3), chuẩn bị KPI ký hợp đồng chính thức (mục 4) | Đạt đủ KPI mục 4 để chuyển sang vận hành thương mại |
 
 ## 3. Tích hợp dữ liệu thật (thay thế phần mock/thiếu hiện tại)
 
-MVP hiện dùng `Dataset.xlsx` tĩnh do đề bài cấp, trong đó **~71% dòng không có giá** và **không có cột tồn kho/review**. Với pilot, các nguồn này cần được thay bằng API thật của doanh nghiệp:
+Snapshot hiện có 36 sản phẩm và 94 địa chỉ cửa hàng; giá là giá catalog online tại thời điểm lấy. Snapshot **không có tồn kho theo chi nhánh, review hoặc dữ liệu đơn hàng**. Khi vận hành, các thông tin biến động này cần API chính thức:
 
 - **Catalog & giá:** API sản phẩm/giá thời gian thực thay cho file Excel tĩnh — bảo toàn nguyên tắc "giá luôn gắn nguồn + thời điểm cập nhật" đã có sẵn trong `SourcedValue.provenance` (`app/schemas.py`), chỉ đổi nguồn ghi (`source="catalog"` → `source="pricing-api", as_of=<timestamp>`), không cần đổi kiến trúc.
 - **Khuyến mãi:** API promotion để `promo_text` phản ánh khuyến mãi đang chạy thay vì trường tĩnh trong Excel.
 - **Tồn kho:** API tồn kho theo cửa hàng/kho — bổ sung field `stock` vào `Product` với cùng cơ chế `SourcedValue` (available/missing), để khi API không trả về vẫn tự động rơi về "chưa có dữ liệu" đúng như cơ chế hiện tại, không cần sửa guardrail.
 - **Review/đánh giá:** tích hợp API đánh giá khách hàng (nếu doanh nghiệp có), hiển thị dưới dạng fact có nguồn (`source="review-api"`), tránh để bot tự tổng hợp cảm tính từ text.
-- **Trả góp:** API trả góp/tài chính đối tác — cùng cơ chế, disclose rõ điều kiện trả góp lấy từ nguồn nào.
+- **Thông tin cửa hàng và dịch vụ:** chỉ bổ sung khi có API hoặc tài liệu chính thức đã xác minh.
 
 Nhờ kiến trúc `SourcedValue` + fact-card + verifier đã tách rời khỏi nguồn dữ liệu cụ thể, việc thay catalog Excel bằng API thật **không đòi hỏi viết lại pipeline** — chỉ cần viết adapter mới ở lớp `app/catalog/loader.py` trả về cùng schema `Product`.
 
@@ -51,8 +51,8 @@ Kiến trúc đã tách LLM sau interface `LLMClient` (`complete_json`/`complete
 
 Theo mô tả luồng hoạt động đầy đủ ở mục 2.7 đề bài, MVP hiện dừng ở bước tư vấn/đề xuất top-3; các bước sau nằm ngoài phạm vi MVP và là hướng mở rộng cho pilot/giai đoạn sau:
 
-- **Cross-sell tại điểm mua:** sau khi khách xác nhận chọn sản phẩm, gợi mở phụ kiện/dịch vụ đi kèm (vd mua tủ lạnh gợi ý thêm gói vệ sinh định kỳ), dùng cùng nguyên tắc gắn nguồn — không bịa khuyến mãi phụ kiện.
-- **Chăm sóc sau mua:** lưu lịch sử mua hàng (cần thiết kế lưu trữ có PII-consent, khác với session RAM hiện tại vốn cố tình không lưu để bảo mật), cho phép bot trả lời câu hỏi hậu mãi (bảo hành, hướng dẫn sử dụng) dựa trên sản phẩm đã mua.
+- **Cross-sell tại điểm mua:** chỉ gợi ý cặp sản phẩm có dữ liệu xác nhận, không tự tạo combo/ưu đãi.
+- **Chăm sóc sau mua:** chỉ trả lời chính sách/hướng dẫn khi có nguồn Co.opSmile được xác minh.
 
 ## 7. Giới hạn hiện tại & việc cần làm tiếp (next steps)
 

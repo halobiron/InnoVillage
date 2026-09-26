@@ -18,8 +18,7 @@ log = logging.getLogger("agent_core")
 
 _POLICY_DIR = Path(__file__).resolve().parents[1] / "data" / "policies"
 
-# Bỏ các từ hội thoại không mang nghĩa retrieval. Trước đây "ti vi thì sao"
-# có thể khớp chunk chứa "vi phạm ... thì" và lấy nhầm cả mục Xe đạp.
+# Bỏ các từ hội thoại không mang nghĩa retrieval.
 _STOPWORDS = {
     "a", "ai", "anh", "ban", "ben", "chi", "cho", "co", "con", "cua", "da",
     "do", "duoc", "em", "gi", "hoi", "khong", "kia", "la", "minh", "nao",
@@ -47,8 +46,7 @@ def _system_prompt(addr: str, self_term: str) -> str:
 
 def _flat(text: str) -> str:
     lowered = text.lower()
-    # Phải bỏ từ hỏi trước khi strip accents; nếu không "mấy giờ" biến thành
-    # "may gio" và đụng chính xác token "máy" trong "máy lạnh".
+    # Bỏ từ hỏi trước khi strip dấu để tránh chúng làm nhiễu token truy xuất.
     lowered = re.sub(r"\bmấy\b", " ", lowered)
     flat = strip_accents(lowered)
     # Chuẩn hóa cách viết tách âm tiết phổ biến để không còn token rác "ti", "vi".
@@ -101,8 +99,7 @@ def search_policy(query: str, top_k: int = 3, policy_dir: Optional[str] = None,
         body_tokens = set(_tokens(c["text"]))
         score = 2.0 * len(q_tokens & title_tokens) + 1.0 * len(q_tokens & body_tokens)
         if category_flat and category_flat in _flat(f"{c['title']} {c['text']}"):
-            # Exact phrase phải áp đảo overlap một token như "lạnh" giữa
-            # "Tủ lạnh" và "Máy lạnh".
+            # Khớp chính xác danh mục phải được ưu tiên hơn trùng lặp token chung.
             score += 20.0
         # Một token chỉ trùng trong thân bài là quá yếu; ít nhất phải trùng tiêu
         # đề (2 điểm), hai token thân bài, hoặc exact category (boost ở trên).
@@ -133,7 +130,7 @@ def answer_policy(query: str, llm=None, policy_dir: Optional[str] = None,
     LLM lỗi/bịa số -> trả nguyên văn chunk khớp nhất."""
     retrieval_query = query
     # Router chỉ gọi node này sau khi intent đã xác nhận câu hỏi policy. Với
-    # follow-up ngắn như "tủ lạnh thì sao", mượn câu hỏi gần nhất để giữ chủ đề.
+    # Follow-up ngắn mượn câu hỏi gần nhất để giữ chủ đề sản phẩm.
     if category:
         for message in reversed(history or []):
             if message.get("role") == "user" and message.get("content"):

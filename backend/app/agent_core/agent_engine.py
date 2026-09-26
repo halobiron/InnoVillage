@@ -165,12 +165,11 @@ def router_edge(state: AgentState) -> str:
     # ngay, thắng mọi nhánh khác (đây là hành động rõ ràng của khách).
     elif is_order_confirmation(query) and (state.get("last_products") or state.get("focused_sku")):
         route = "confirm_purchase"
-    # Khách hỏi về máy/đơn ĐÃ MUA trước đó (chăm sóc sau mua) -> tra theo lịch sử mua
+    # Khách hỏi về sản phẩm/đơn ĐÃ MUA trước đó (chăm sóc sau mua) -> tra theo lịch sử mua
     # hàng của phiên, không lẫn với câu hỏi bảo hành của máy đang xem lần đầu.
     elif is_aftersales_question(query):
         route = "aftersales"
-    # Cờ policy vẫn xét trước detail: câu như "phí lắp đặt thế nào" dính cả keyword
-    # detail nhưng phí/vận hành chỉ có trong tài liệu chính sách.
+    # Policy vẫn xét trước detail để các câu hỏi về vận hành dùng tài liệu chính sách.
     elif intent.get("is_policy_question"):
         route = "policy"
     elif _is_detail_followup(state):
@@ -219,11 +218,10 @@ def clarify_node(state: AgentState, config) -> AgentState:
     if not cat and not qs:
         cats = get_catalog_metadata(_cfg(config, "db_path"))["categories"]
         qs = ["Cửa hàng hiện có: " + ", ".join(cats) + ". Đang cần nhóm sản phẩm nào?"]
-    # Câu hỏi làm rõ do LLM viết; graph chỉ giữ cấu trúc danh sách để UI dễ đọc,
-    # không tự chèn lời chào hay đại từ mặc định.
+    # Giữ nguyên câu chữ do LLM viết; chỉ ghép lời dẫn khi có, không biến câu hỏi
+    # thành danh sách hoặc thêm đại từ/lời chào mặc định.
     transition = (intent.get("transition_message") or "").strip()
-    parts = ([transition] if transition else []) + [f"- {q}" for q in qs]
-    text = "\n\n".join(parts) if transition else "\n".join(parts)
+    text = "\n\n".join(([transition] if transition else []) + qs)
     history = state.get("history", []) + [{"role": "assistant", "content": text}]
     return {"response": text, "question": qs[0] if qs else None, "stage": "collecting",
             "cards": [], "comparison": None, "assumptions": [], "warnings": [], "history": history,
@@ -263,8 +261,7 @@ def policy_node(state: AgentState, config) -> AgentState:
         return unsupported_node(state, config)
     _notify(config, "Đang tra cứu chính sách cửa hàng…")
     query = state.get("query", "")
-    # Ngữ cảnh là bắt buộc: khách hỏi "phí lắp đặt như nào" giữa cuộc tư vấn tủ lạnh
-    # thì phải trả lời cho tủ lạnh, không được trút ví dụ của nhóm hàng khác.
+    # Giữ danh mục sản phẩm trong ngữ cảnh khi truy vấn câu hỏi chính sách.
     intent = state.get("intent", {})
     category = intent.get("category")
     if not category:

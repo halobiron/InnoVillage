@@ -1,4 +1,4 @@
-# Kiến trúc hệ thống — Trợ lý AI tư vấn Điện Máy Xanh
+# Kiến trúc hệ thống — Trợ lý AI Co.opSmile
 
 ## Pipeline phục vụ
 
@@ -23,7 +23,7 @@ Trạng thái hội thoại được LangGraph `MemorySaver` lưu theo `session_
 
 ## Dữ liệu
 
-`app/agent_core/products.db` là nguồn dữ liệu runtime. Mô-đun `catalog/` và các script phục vụ làm sạch, chuẩn hoá hoặc nạp lại dữ liệu, không nằm trên luồng trả lời chat.
+`app/agent_core/products.db` là nguồn dữ liệu runtime, được dựng từ `data/coopsmile_catalog.json` và `data/coopsmile_stores.json` bằng `scripts/import_coopsmile_snapshot.py`. Catalog hiện giới hạn ở chăm sóc cá nhân và chăm sóc nhà cửa; bảng `store_locations` lưu địa chỉ cửa hàng công khai. Danh sách cửa hàng không cho biết tồn kho theo chi nhánh.
 
 ## Guardrail chống bịa số liệu
 
