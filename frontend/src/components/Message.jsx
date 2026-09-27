@@ -4,17 +4,25 @@ import remarkGfm from 'remark-gfm'
 import ComparisonTable from './ComparisonTable'
 import ContextualSuggestions from './ContextualSuggestions'
 
-export default function Message({ msg, isLast, onSuggest, disabled }) {
+export default function Message({ msg, isLast, onSuggest, disabled, blindMode = false }) {
   const { role, text, recommendation } = msg
   const [activeCard, setActiveCard] = useState(null)
   const [activeTab, setActiveTab] = useState('specs')
+  const [revealed, setRevealed] = useState([])
 
   const isUser = role === 'user'
+  const cards = recommendation?.cards || []
+  const displayText = blindMode && !isUser
+    ? cards.reduce((text, card, index) => {
+        const title = card.title.replace('Vì sao em đề xuất ', '').replace('Thông tin chi tiết: ', '').replace(/\?/g, '').trim()
+        return title ? text.replaceAll(title, `Lựa chọn ${String.fromCharCode(65 + index)}`) : text
+      }, text)
+    : text
 
   return (
     <div className={`msg ${isUser ? 'user' : 'bot'}`}>
       <div className="bubble">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayText}</ReactMarkdown>
       </div>
 
       {recommendation?.warnings?.length > 0 && (
@@ -26,13 +34,18 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
         </div>
       )}
 
+      {blindMode && cards.length > 0 && (
+        <div className="blind-mode-note">Đang xem theo giá và thuộc tính trước. Tên và hình sản phẩm sẽ hiện khi bạn chọn “Xem sản phẩm”.</div>
+      )}
+
       {recommendation?.comparison && (
-        <ComparisonTable table={recommendation.comparison} cards={recommendation.cards} />
+        <ComparisonTable table={recommendation.comparison} cards={cards} blindMode={blindMode} revealed={revealed} onReveal={(i) => setRevealed((v) => v.includes(i) ? v : [...v, i])} />
       )}
 
       {recommendation?.cards && recommendation.cards.length > 0 && (
         <div className="product-cards-grid">
           {recommendation.cards.map((c, i) => {
+            const isRevealed = !blindMode || revealed.includes(i)
             const titleText = c.title
               .replace('Vì sao em đề xuất ', '')
               .replace('Thông tin chi tiết: ', '')
@@ -43,7 +56,7 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
             const promoLine = c.lines?.find((l) => l.label === 'Khuyến mãi/quà kèm')
 
             const cardBadgeLabels = ['Giá', 'Giá gốc', 'Khuyến mãi/quà kèm', 'Tình trạng', 'Đánh giá', 'Trả góp']
-            const specLines = c.lines?.filter((l) => !cardBadgeLabels.includes(l.label)) || []
+            const specLines = c.lines?.filter((l) => !cardBadgeLabels.includes(l.label) && (isRevealed || !/thương hiệu|model|mã sản phẩm|sku/i.test(l.label))) || []
 
             let promos = []
             if (promoLine && promoLine.value) {
@@ -53,7 +66,7 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
             return (
               <div className="product-card" key={i}>
                 <div className="product-card-img">
-                  {c.image_url ? (
+                  {isRevealed && c.image_url ? (
                     <img src={c.image_url} alt={titleText} loading="lazy" />
                   ) : (
                     <div className="img-placeholder">
@@ -66,8 +79,8 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
                 </div>
 
                 <div className="product-card-info">
-                  <h4 className="product-title" title={titleText}>
-                    {titleText}
+                  <h4 className="product-title" title={isRevealed ? titleText : `Lựa chọn ${String.fromCharCode(65 + i)}`}>
+                    {isRevealed ? titleText : `Lựa chọn ${String.fromCharCode(65 + i)}`}
                   </h4>
 
                   <div className="product-price-row">
@@ -84,7 +97,10 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
                   )}
 
                   <div className="product-card-buttons">
-                    <button
+                    {blindMode && !isRevealed && (
+                      <button className="btn-primary" onClick={() => setRevealed((v) => [...v, i])}>Chọn lựa chọn này</button>
+                    )}
+                    {isRevealed && <button
                       className="btn-outline"
                       onClick={() => {
                         setActiveCard({
@@ -102,9 +118,9 @@ export default function Message({ msg, isLast, onSuggest, disabled }) {
                       }}
                     >
                       Chi tiết
-                    </button>
+                    </button>}
 
-                    {c.product_link && (
+                    {isRevealed && c.product_link && (
                       <a
                         href={c.product_link}
                         target="_blank"

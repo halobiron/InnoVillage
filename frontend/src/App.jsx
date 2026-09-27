@@ -18,6 +18,7 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState(null)
   const [theme, setTheme] = useState(() => localStorage.getItem('emx_theme') || 'light')
+  const [blindMode, setBlindMode] = useState(false)
   
   const chatRef = useRef(null)
   const inputRef = useRef(null)
@@ -62,6 +63,7 @@ export default function App() {
     
     try {
       const res = await sendChatStream(SID, text, {
+        prioritizeUse: blindMode,
         onStatus: (st) => setStatus(st),
         onDelta: (chunk) => {
           if (!streamed) {
@@ -96,7 +98,7 @@ export default function App() {
     } catch (e) {
       if (e.phase === 'connect') {
         try {
-          const res = await sendChat(SID, text)
+          const res = await sendChat(SID, text, blindMode)
           setMessages((m) => [
             ...m,
             {
@@ -166,6 +168,9 @@ export default function App() {
           </div>
 
           <div className="header-actions">
+            <button className={`blind-mode-toggle ${blindMode ? 'active' : ''}`} onClick={() => setBlindMode((v) => !v)} aria-pressed={blindMode} title="Ẩn tên và hình sản phẩm trong gợi ý mới">
+              {blindMode ? '✓ ' : ''}Ưu tiên công dụng trước
+            </button>
             <button
               className="icon-btn"
               onClick={toggleTheme}
@@ -206,6 +211,7 @@ export default function App() {
                 isLast={i === messages.length - 1}
                 onSuggest={send}
                 disabled={busy}
+                blindMode={blindMode}
               />
             ))}
 

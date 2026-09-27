@@ -140,7 +140,8 @@ def agent_query(llm, user_query: str, intent: Dict[str, Any],
     user = (f"Nhu cầu khách: {user_query}\n"
             f"Phiếu nhu cầu đã trích: category={intent.get('category')!r}, "
             f"budget_max={intent.get('budget_max')}, brand={intent.get('brand')!r}, "
-            f"priority={intent.get('priority_features')}\n"
+            f"priority={intent.get('priority_features')}, "
+            f"requested_product_type={intent.get('requested_product_type')!r}\n"
             "Soạn SQL chọn sản phẩm phù hợp nhất.")
     err_note = ""
     last_zero_sql: Optional[str] = None

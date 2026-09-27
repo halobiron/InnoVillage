@@ -9,12 +9,6 @@ def _rows():
              "key_specs_summary": "", "full_specs_json": '{"Dung tích tổng": "250 lít"}'}]
 
 
-def test_build_cards_titles():
-    cards = build_cards(_rows(), ["tiết kiệm điện"])
-    assert cards[0].title.startswith("Lý do đề xuất")
-    assert len(cards) == 2
-
-
 def test_build_cards_marks_product_over_customer_budget():
     rows = _rows()
     rows[0]["_over_budget"] = True

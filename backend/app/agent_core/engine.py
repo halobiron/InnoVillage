@@ -7,7 +7,8 @@ from app.llm.client import get_llm
 class Engine(Protocol):
     def handle(self, session_id: str, message: str,
                on_status: Optional[Callable[[str], None]] = None,
-               on_delta: Optional[Callable[[str], None]] = None) -> Dict[str, Any]: ...
+               on_delta: Optional[Callable[[str], None]] = None,
+               prioritize_use: bool = False) -> Dict[str, Any]: ...
 
     def reset(self, session_id: str) -> None: ...
 
@@ -38,11 +39,12 @@ class AgentCoreEngine:
 
     def handle(self, session_id: str, message: str,
                on_status: Optional[Callable[[str], None]] = None,
-               on_delta: Optional[Callable[[str], None]] = None) -> Dict[str, Any]:
+               on_delta: Optional[Callable[[str], None]] = None,
+               prioritize_use: bool = False) -> Dict[str, Any]:
         config = {"configurable": {"thread_id": self._thread(session_id),
                                    "llm": self.llm, "db_path": self.db_path,
                                    "on_status": on_status, "on_delta": on_delta}}
-        result = self.graph.invoke({"query": message}, config=config)
+        result = self.graph.invoke({"query": message, "prioritize_use": prioritize_use}, config=config)
         intent = result.get("intent", {})
         stage = result.get("stage", "collecting")
         recommendation = None

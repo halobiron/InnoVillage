@@ -51,6 +51,7 @@ def main() -> None:
             full_specs_json TEXT,
             product_name TEXT,
             url TEXT,
+            product_url TEXT,
             source_name TEXT,
             retrieved_at TEXT
         )""")
@@ -88,11 +89,12 @@ def main() -> None:
                 conn.execute("""INSERT INTO all_products
                     (model_code, sku, category, category_table, brand, price_orig,
                      price_promo, price_clean, gift_promo, key_specs_summary,
-                     full_specs_json, product_name, url, source_name, retrieved_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?)""",
+                    full_specs_json, product_name, url, product_url, source_name, retrieved_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?)""",
                     (item["sku"], item["sku"], category, table, item.get("brand"),
                      str(regular or price), str(price), price, item["name"],
                      json.dumps(facts, ensure_ascii=False), item["name"], item["url"],
+                     item.get("product_url"),
                      catalog["source_name"], catalog["retrieved_at"]))
                 conn.execute(f'''INSERT INTO "{table}"
                     (model_code, sku, product_name, brand, price_clean, regular_price,

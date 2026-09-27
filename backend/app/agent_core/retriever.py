@@ -201,7 +201,8 @@ def search_products(
     priority_features: Optional[List[str]] = None,
     top_k: int = 5,
     db_path: Optional[str] = None,
-    is_meta_inquiry: bool = False
+    is_meta_inquiry: bool = False,
+    product_type: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Retrieve catalog products using only the customer constraints.
@@ -246,6 +247,10 @@ def search_products(
     if brand and brand.strip():
         conditions.append("LOWER(brand) = LOWER(?)")
         params.append(brand.strip())
+
+    if product_type and product_type.strip():
+        conditions.append("LOWER(product_name) LIKE LOWER(?)")
+        params.append(f"%{product_type.strip()}%")
         
     sql = "SELECT * FROM all_products"
     if conditions:

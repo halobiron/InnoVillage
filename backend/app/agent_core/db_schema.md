@@ -24,6 +24,7 @@
 - "full_specs_json" — vd: {"Tên sản phẩm": "Kem đánh răng Colgate Optic White Purple 1
 - "product_name" — vd: Kem đánh răng Colgate Optic White Purple 100g
 - "url" — vd: https://coopsmile.vn/collections/cham-soc-ca-nhan
+- "product_url" — vd: https://coopsmile.vn/products/nuoc-giat-omo-cua-tren-huong-n
 - "source_name" — vd: Co.opSmile online catalog
 - "retrieved_at" — vd: 2026-09-26
 

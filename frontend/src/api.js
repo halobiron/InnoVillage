@@ -1,7 +1,7 @@
-export async function sendChat(sessionId, message) {
+export async function sendChat(sessionId, message, prioritizeUse = false) {
   const r = await fetch('/api/chat', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId, message }),
+    body: JSON.stringify({ session_id: sessionId, message, prioritize_use: prioritizeUse }),
   })
   if (!r.ok) throw new Error('API error')
   return r.json()
@@ -14,12 +14,12 @@ export async function sendChat(sessionId, message) {
 // Thrown errors carry err.phase:
 //   'connect' — request never started processing → caller MAY retry via sendChat
 //   'stream'  — broke mid-stream, turn already processed server-side → do NOT resend
-export async function sendChatStream(sessionId, message, { onStatus, onDelta }) {
+export async function sendChatStream(sessionId, message, { onStatus, onDelta, prioritizeUse = false }) {
   let r
   try {
     r = await fetch('/api/chat/stream', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId, message }),
+      body: JSON.stringify({ session_id: sessionId, message, prioritize_use: prioritizeUse }),
     })
   } catch {
     throw streamError('connect')

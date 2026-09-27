@@ -68,10 +68,10 @@ def _normalize_pid(raw: Any) -> str | None:
 
 
 def _lookup_web_meta(row: Dict[str, Any]) -> Dict[str, Any]:
-    """Trả liên kết catalog đã lưu cùng sản phẩm; không gọi một crawler bán lẻ khác."""
+    """Return a saved product detail link; category URLs are not buy links."""
     meta: Dict[str, Any] = {"productidweb": _normalize_pid(row.get("productidweb")),
                             "link": None, "image": None, "rating": None}
-    url = row.get("url")
+    url = row.get("product_url")
     if isinstance(url, str) and url.startswith("https://"):
         meta["link"] = url
     return meta
@@ -89,6 +89,7 @@ def _apply_db_rating(card: FactCard, rating: float | None) -> None:
 def build_reco_card(row: Dict[str, Any], priority_features: List[str], self_term: str = "em") -> FactCard:
     """Card 'vì sao đề xuất': giá + hãng + vài spec liên quan ưu tiên của khách; mọi dòng gắn nguồn."""
     name = product_display_name(row)
+    meta = _lookup_web_meta(row)
     lines: List[FactLine] = []
     missing: List[str] = []
     price = _price_value(row)
@@ -100,8 +101,8 @@ def build_reco_card(row: Dict[str, Any], priority_features: List[str], self_term
         lines.append(FactLine(label="Ngân sách", value="Vượt ngân sách khách đặt ra",
                               source="đối chiếu với yêu cầu khách"))
     lines.append(FactLine(label="Thương hiệu", value=row.get("brand") or "N/A", source="catalog"))
-    if row.get("url"):
-        lines.append(FactLine(label="Link sản phẩm", value=str(row["url"]), source="catalog"))
+    if meta["link"]:
+        lines.append(FactLine(label="Link sản phẩm", value=meta["link"], source="catalog"))
 
     specs = load_specs(row)
     prefs_low = [p.lower() for p in (priority_features or [])]
@@ -122,8 +123,7 @@ def build_reco_card(row: Dict[str, Any], priority_features: List[str], self_term
                                source="khuyến mãi (catalog)"))
     missing.extend(_ALWAYS_MISSING)
 
-    meta = _lookup_web_meta(row)
-    card = FactCard(title=f"Lý do đề xuất {name}", lines=lines, missing=missing,
+    card = FactCard(title=f"{name}", lines=lines, missing=missing,
                     productidweb=meta["productidweb"], image_url=meta["image"],
                     product_link=meta["link"])
     _apply_db_rating(card, meta["rating"])
@@ -133,6 +133,7 @@ def build_reco_card(row: Dict[str, Any], priority_features: List[str], self_term
 def build_detail_card(row: Dict[str, Any]) -> FactCard:
     """Fact-sheet đầy đủ 1 sản phẩm: giá + TOÀN BỘ spec + quà; mọi dòng gắn nguồn."""
     name = product_display_name(row)
+    meta = _lookup_web_meta(row)
     lines: List[FactLine] = []
     missing: List[str] = []
     price = _price_value(row)
@@ -141,8 +142,8 @@ def build_detail_card(row: Dict[str, Any]) -> FactCard:
     else:
         missing.append("giá")
     lines.append(FactLine(label="Thương hiệu", value=row.get("brand") or "N/A", source="catalog"))
-    if row.get("url"):
-        lines.append(FactLine(label="Link sản phẩm", value=str(row["url"]), source="catalog"))
+    if meta["link"]:
+        lines.append(FactLine(label="Link sản phẩm", value=meta["link"], source="catalog"))
     for k, v in load_specs(row).items():
         lines.append(FactLine(label=k, value=v, source="thông số nhà sản xuất"))
     if row.get("gift_promo"):
@@ -150,7 +151,6 @@ def build_detail_card(row: Dict[str, Any]) -> FactCard:
                                source="khuyến mãi (catalog)"))
     missing.extend(_ALWAYS_MISSING)
 
-    meta = _lookup_web_meta(row)
     card = FactCard(title=f"Thông tin chi tiết: {name}", lines=lines, missing=missing,
                     productidweb=meta["productidweb"], image_url=meta["image"],
                     product_link=meta["link"])

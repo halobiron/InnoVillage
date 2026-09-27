@@ -29,6 +29,7 @@ _AGENT_ENGINE: AgentCoreEngine | None = None
 class ChatIn(BaseModel):
     session_id: str
     message: str
+    prioritize_use: bool = False
 
 
 class ResetIn(BaseModel):
@@ -59,7 +60,7 @@ def health():
 
 @app.post("/api/chat")
 def chat(body: ChatIn, engine: Engine = Depends(get_engine)):
-    return engine.handle(body.session_id, body.message)
+    return engine.handle(body.session_id, body.message, prioritize_use=body.prioritize_use)
 
 
 @app.post("/api/chat/stream")
@@ -75,7 +76,8 @@ def chat_stream(body: ChatIn, engine: Engine = Depends(get_engine)):
                 payload = engine.handle(
                     body.session_id, body.message,
                     on_status=lambda t: q.put(("status", t)),
-                    on_delta=lambda t: q.put(("delta", t)))
+                    on_delta=lambda t: q.put(("delta", t)),
+                    prioritize_use=body.prioritize_use)
                 q.put(("result", payload))
             except Exception:
                 q.put(("error", None))

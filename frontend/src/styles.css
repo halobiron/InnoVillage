@@ -1145,4 +1145,35 @@ body {
   }
 }
 
+.blind-mode-toggle {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.blind-mode-toggle.active { color: var(--blue); border-color: var(--blue); background: var(--bg-subtle); }
+.blind-mode-note {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  font-size: 12px;
+}
+.blind-reveal-btn {
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  color: var(--blue);
+  background: var(--bg-surface);
+  font-size: 11px;
+  cursor: pointer;
+}
+
 

@@ -70,7 +70,7 @@ function TradeoffPointsList({ points, type }) {
   )
 }
 
-export default function ComparisonTable({ table, cards }) {
+export default function ComparisonTable({ table, cards, blindMode = false, revealed = [], onReveal }) {
   const [showAllSpecs, setShowAllSpecs] = useState(false)
   if (!table || !table.products?.length || !table.rows?.length) return null
   const hasTradeoffs = table.tradeoffs?.length === table.products.length
@@ -100,7 +100,9 @@ export default function ComparisonTable({ table, cards }) {
               : ''
           }
         >
-          <CellBody cell={c} />
+          {blindMode && /thương hiệu|nhãn hàng|model|mã sản phẩm|tên sản phẩm|tên hàng|product[_ ]?name/i.test(row.label) && !revealed.includes(ci)
+            ? <span className="spec-text">Ẩn đến khi chọn</span>
+            : <CellBody cell={c} />}
         </td>
       ))}
     </tr>
@@ -125,11 +127,12 @@ export default function ComparisonTable({ table, cards }) {
                 return (
                   <th key={i} className="th-product">
                     <div className="product-head">
-                      {card?.image_url && (
+                      {(!blindMode || revealed.includes(i)) && card?.image_url && (
                         <img src={card.image_url} alt={p} className="product-head-thumb" />
                       )}
-                      <div className="product-head-title" title={p}>{p}</div>
+                      <div className="product-head-title" title={blindMode && !revealed.includes(i) ? '' : p}>{blindMode && !revealed.includes(i) ? `Lựa chọn ${String.fromCharCode(65 + i)}` : p}</div>
                       {priceLine && <div className="product-head-price">{priceLine.value}</div>}
+                      {blindMode && !revealed.includes(i) && <button className="blind-reveal-btn" onClick={() => onReveal?.(i)}>Chọn lựa chọn này</button>}
                     </div>
                   </th>
                 )
@@ -196,7 +199,7 @@ export default function ComparisonTable({ table, cards }) {
                 const card = findCardForProduct(p, cards)
                 return (
                   <td key={i}>
-                    {card && card.product_link ? (
+                    {(!blindMode || revealed.includes(i)) && card && card.product_link ? (
                       <a
                         href={card.product_link}
                         target="_blank"

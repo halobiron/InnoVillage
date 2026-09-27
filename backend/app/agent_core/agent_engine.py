@@ -2,7 +2,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, TypedDict
 
-from app.agent_core.intent import IntentServiceUnavailableError, extract_intent
+from app.agent_core.intent import (IntentServiceUnavailableError, extract_intent,
+                                   matches_explicit_catalog_name)
 from app.agent_core.policy import answer_policy
 from app.agent_core.retriever import (search_products, price_spread_products, get_catalog_metadata,
                                        category_table_for, hydrate_rows, find_product_by_identifier)
@@ -26,6 +27,7 @@ class AgentState(TypedDict, total=False):
     """State được MemorySaver checkpoint -> chỉ chứa dữ liệu serialize được.
     Runtime deps (llm, db_path, callbacks) truyền qua config['configurable'], KHÔNG để trong state."""
     query: str
+    prioritize_use: bool
     history: List[Dict[str, str]]
     intent: Dict[str, Any]
     retrieval: Dict[str, Any]
@@ -99,7 +101,8 @@ def intent_node(state: AgentState, config) -> AgentState:
     try:
         intent = extract_intent(query, history, _cfg(config, "llm"), _cfg(config, "db_path"),
                                 candidate_products=state.get("last_products") or [],
-                                addr=customer_addr, self_term=self_term)
+                                addr=customer_addr, self_term=self_term,
+                                prioritize_use=state.get("prioritize_use", False))
     except IntentServiceUnavailableError:
         log.warning("intent_node: intent service unavailable")
         history = history + [{"role": "user", "content": query}]
@@ -425,10 +428,39 @@ def retrieval_node(state: AgentState, config) -> AgentState:
                                 cat_table, db_path)
         if agent_res is not None:
             prods = hydrate_rows(agent_res["rows"], db_path) if agent_res.get("rows") else []
-            res = {"status": "custom_query" if prods else "no_products_found", 
-                   "sql_query": agent_res.get("sql", ""),
-                   "total_matches_found": len(prods),
-                   "top_3_products": prods[:3], "all_top_k": prods[:5]}
+            required_category = intent.get("category")
+            scoped = [p for p in prods if not required_category or p.get("category") == required_category]
+            budget_max = intent.get("budget_max")
+            if budget_max:
+                # Treat SQL output as candidates, then enforce the same explicit
+                # constraints as the deterministic retriever. The latter allows
+                # a clearly labelled 5% near-budget option.
+                scoped = [p for p in scoped
+                          if 0 < float(p.get("price_clean") or 0) <= budget_max * 1.05]
+            requested_brand = intent.get("brand")
+            if requested_brand:
+                scoped = [p for p in scoped
+                          if str(p.get("brand") or "").casefold() == requested_brand.casefold()]
+            requested_type = intent.get("requested_product_type")
+            if requested_type:
+                from app.agent_core.intent import _fold_vietnamese
+                scoped = [p for p in scoped if _fold_vietnamese(requested_type) in _fold_vietnamese(
+                    str(p.get("product_name") or p.get("key_specs_summary") or ""))]
+            if intent.get("explicit_catalog_product"):
+                scoped = [p for p in scoped if matches_explicit_catalog_name(
+                    state.get("query", ""), str(p.get("product_name") or p.get("key_specs_summary") or ""))]
+            if len(scoped) != len(prods):
+                log.warning("retrieval_node: SQL trả %d/%d sản phẩm sai ngành hàng; loại bỏ trước tư vấn",
+                            len(prods) - len(scoped), len(prods))
+            if scoped:
+                res = {"status": "custom_query" if scoped else "no_products_found",
+                       "sql_query": agent_res.get("sql", ""),
+                       "total_matches_found": len(scoped),
+                       "top_3_products": scoped[:3], "all_top_k": scoped[:5]}
+            else:
+                # SQL returning zero rows is not proof that the catalog has no
+                # match. Retry with the deterministic category/budget filters.
+                log.warning("retrieval_node: SQL không có candidate hợp lệ; dùng retriever tất định")
         else:
             log.info("retrieval_node: SQL tool không dùng được -> retriever deterministic")
     if res is None:
@@ -441,7 +473,22 @@ def retrieval_node(state: AgentState, config) -> AgentState:
             top_k=5,
             db_path=_cfg(config, "db_path"),
             is_meta_inquiry=intent.get("is_meta_inquiry", False),
+            product_type=intent.get("requested_product_type"),
         )
+        requested_type = intent.get("requested_product_type")
+        if requested_type:
+            from app.agent_core.intent import _fold_vietnamese
+            typed_rows = [p for p in res.get("all_top_k", []) if _fold_vietnamese(requested_type) in
+                          _fold_vietnamese(str(p.get("product_name") or p.get("key_specs_summary") or ""))]
+            res = {**res, "status": "custom_query" if typed_rows else "no_products_found",
+                   "total_matches_found": len(typed_rows), "all_top_k": typed_rows,
+                   "top_3_products": typed_rows[:3]}
+        if intent.get("explicit_catalog_product"):
+            filtered = [p for p in res.get("all_top_k", []) if matches_explicit_catalog_name(
+                state.get("query", ""), str(p.get("product_name") or p.get("key_specs_summary") or ""))]
+            res = {**res, "status": "custom_query" if filtered else "no_products_found",
+                   "total_matches_found": len(filtered), "all_top_k": filtered,
+                   "top_3_products": filtered[:3]}
     log.info("retrieval_node: status=%s total=%s top3=%s | sql=%s",
              res.get("status"), res.get("total_matches_found"),
              [product_display_name(r) for r in res.get("top_3_products", [])],
@@ -458,7 +505,8 @@ def advisor_node(state: AgentState, config) -> AgentState:
     cards = build_cards(rows, intent.get("priority_features", []), self_term=_self(state))
     message, _streamed, warnings = generate_advisor(
         state.get("query", ""), intent, rows, status, _cfg(config, "llm"), cards,
-        on_delta=_cfg(config, "on_delta"), addr=_addr(state), self_term=_self(state))
+        on_delta=_cfg(config, "on_delta"), addr=_addr(state), self_term=_self(state),
+        db_path=_cfg(config, "db_path"))
     return {"response": message, "stage": "recommended", "question": None,
             "cards": [c.model_dump() for c in cards], "warnings": warnings,
             "assumptions": list(intent.get("assumptions") or [])}

@@ -1,9 +1,12 @@
 import logging
 import json
+import re
+import sqlite3
+import unicodedata
 from typing import List, Dict, Any, Optional
 import httpx
 from pydantic import BaseModel, Field
-from app.agent_core.retriever import get_catalog_metadata, get_schema_summary
+from app.agent_core.retriever import get_catalog_metadata, get_schema_summary, _resolve_db
 
 log = logging.getLogger("agent_core")
 
@@ -51,6 +54,75 @@ def normalize_intent_scope(intent: Dict[str, Any], categories: List[str]) -> Dic
     else:
         out["unsupported_reply"] = None
     return out
+
+
+def _fold_vietnamese(text: str) -> str:
+    text = unicodedata.normalize("NFD", text.lower())
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    return re.sub(r"[^a-z0-9]+", " ", text).strip()
+
+
+def infer_explicit_catalog_category(query: str, db_path: Optional[str] = None) -> Optional[str]:
+    """Trust an exact multiword product phrase in the catalog over a mistaken LLM category."""
+    query_folded = f" {_fold_vietnamese(query)} "
+    conn = sqlite3.connect(_resolve_db(db_path))
+    try:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(all_products)")}
+        name_column = "product_name" if "product_name" in columns else "key_specs_summary"
+        rows = conn.execute(
+            f"SELECT DISTINCT category, {name_column} FROM all_products "
+            f"WHERE category IS NOT NULL AND {name_column} IS NOT NULL"
+        ).fetchall()
+    finally:
+        conn.close()
+
+    matches = []
+    for category, product_name in rows:
+        words = _fold_vietnamese(str(product_name or "")).split()
+        # Product names include the actual kind (e.g. "nước giặt", "bàn chải").
+        # Match phrases of two or more words to avoid broad single-word hits like "nước".
+        for size in range(min(6, len(words)), 1, -1):
+            phrase = " " + " ".join(words[:size]) + " "
+            if phrase in query_folded:
+                matches.append((size, category))
+                break
+    if not matches:
+        return None
+    max_size = max(size for size, _ in matches)
+    categories = {category for size, category in matches if size == max_size}
+    return next(iter(categories)) if len(categories) == 1 else None
+
+
+_PRODUCT_TYPES = (
+    ("nước giặt", ("nước giặt", "nước giặt quần áo"), "Chăm sóc nhà cửa"),
+    ("bột giặt", ("bột giặt",), "Chăm sóc nhà cửa"),
+    ("nước xả vải", ("nước xả vải", "nước xả"), "Chăm sóc nhà cửa"),
+    ("nước rửa chén", ("nước rửa chén", "nước rửa bát"), "Chăm sóc nhà cửa"),
+    ("kem đánh răng", ("kem đánh răng",), "Chăm sóc cá nhân"),
+    ("bàn chải đánh răng", ("bàn chải đánh răng",), "Chăm sóc cá nhân"),
+)
+
+
+def infer_requested_product_type(text: str, categories: List[str]) -> tuple[str, str] | None:
+    """Recover a concrete product kind from the full user conversation."""
+    folded = f" {_fold_vietnamese(text)} "
+    by_folded = {_fold_vietnamese(category): category for category in categories}
+    for kind, aliases, category in _PRODUCT_TYPES:
+        if any(f" {_fold_vietnamese(alias)} " in folded for alias in aliases):
+            canonical = by_folded.get(_fold_vietnamese(category))
+            if canonical:
+                return kind, canonical
+    return None
+
+
+def matches_explicit_catalog_name(query: str, product_name: str) -> bool:
+    """Check whether a candidate's leading product phrase was explicitly named."""
+    query_folded = f" {_fold_vietnamese(query)} "
+    words = _fold_vietnamese(product_name).split()
+    return any(
+        (" " + " ".join(words[:size]) + " ") in query_folded
+        for size in range(min(6, len(words)), 1, -1)
+    )
 
 
 # Pydantic schema mô tả ý định tìm kiếm sản phẩm.
@@ -176,7 +248,7 @@ _SCHEMA_HINT = (
 def extract_intent(query: str, history: Optional[List[Dict[str, str]]] = None,
                    llm=None, db_path: Optional[str] = None,
                    candidate_products: Optional[List[Dict[str, Any]]] = None, addr: str = "",
-                   self_term: str = "") -> Dict[str, Any]:
+                   self_term: str = "", prioritize_use: bool = False) -> Dict[str, Any]:
     """Trích ý định qua DeepSeek; không suy đoán intent khi dịch vụ lỗi."""
     if llm is None:
         log.error("intent: không có LLM được cấu hình")
@@ -213,6 +285,13 @@ def extract_intent(query: str, history: Optional[List[Dict[str, str]]] = None,
             "- Giữ cách xưng hô mà khách đã nói rõ. Khi chưa có bằng chứng, không tự gán tuổi, giới tính hay "
             "vai vế; ưu tiên câu không cần gọi trực tiếp khách thay vì ép dùng một đại từ mặc định."
         )
+        if prioritize_use:
+            system += (
+                "\n- Khách đang bật chế độ Ưu tiên công dụng trước: khi danh mục đã rõ nhưng còn thiếu tiêu chí, "
+                "không hỏi thương hiệu trước. Hãy hỏi đúng MỘT câu về công dụng/đặc tính phù hợp với mặt hàng "
+                "(ví dụ nước giặt: ưu tiên giặt sạch, lưu hương, dịu nhẹ hay dùng cho máy giặt); nếu khách đã "
+                "nêu ngân sách thì không hỏi lại ngân sách. Không tự khẳng định sản phẩm có công dụng khi chưa có dữ liệu."
+            )
         candidate_lines = []
         for row in candidate_products or []:
             product_id = str(row.get("model_code") or row.get("sku") or "")
@@ -250,6 +329,24 @@ def extract_intent(query: str, history: Optional[List[Dict[str, str]]] = None,
         }).model_dump()
         categories = get_catalog_metadata(db_path)["categories"]
         intent = normalize_intent_scope(intent, categories)
+        conversation = " ".join(
+            str(item.get("content") or "") for item in (history or [])
+            if item.get("role") == "user"
+        ) + " " + query
+        requested_type = infer_requested_product_type(conversation, categories)
+        if requested_type:
+            intent["requested_product_type"], intent["category"] = requested_type
+            intent["unsupported_product"] = None
+            intent["unsupported_reply"] = None
+        catalog_category = infer_explicit_catalog_category(query, db_path)
+        if catalog_category and intent.get("category") != catalog_category:
+            log.warning("intent: sửa category %r -> %r theo tên mặt hàng khớp catalog",
+                        intent.get("category"), catalog_category)
+            intent["category"] = catalog_category
+            intent["unsupported_product"] = None
+            intent["unsupported_reply"] = None
+        if catalog_category:
+            intent["explicit_catalog_product"] = True
         valid_ids = {str(r.get("model_code") or r.get("sku") or "") for r in candidate_products or []}
         if intent.get("selected_product_id") not in valid_ids:
             intent["selected_product_id"] = None

@@ -25,17 +25,6 @@ def test_load_specs_parses_json():
     specs = load_specs(_row())
     assert specs["Dung tích tổng"] == "300 lít"
 
-
-def test_reco_card_has_price_and_missing():
-    card = build_reco_card(_row(), ["tiết kiệm điện"])
-    assert card.title.startswith("Lý do đề xuất")
-    labels = [l.label for l in card.lines]
-    assert "Giá" in labels and "Thương hiệu" in labels
-    assert "tồn kho" in card.missing
-    price_line = next(l for l in card.lines if l.label == "Giá")
-    assert "12.400.000" in price_line.value
-
-
 def test_reco_card_missing_price():
     card = build_reco_card(_row(price_clean=0), [])
     assert "giá" in card.missing

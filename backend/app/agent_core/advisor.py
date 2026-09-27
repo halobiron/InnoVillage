@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple
+import sqlite3
 from app.schemas import AdviceResult, FactCard
 from app.agent_core.presenters import build_reco_card
 from app.agent_core.retriever import get_catalog_metadata
@@ -21,8 +22,12 @@ def _system_prompt(addr: str, self_term: str) -> str:
         "KHÔNG đổi sang '10 triệu' hay '10,01 triệu'; thông số giữ nguyên đơn vị như FACTS).\n"
         "1c. KHÔNG cộng/gộp/tính tổng hay làm tròn các con số (ví dụ KHÔNG cộng dung tích ngăn đá + ngăn "
         "lạnh thành 'tổng ~330 lít'); chỉ nêu lại từng con số đúng như FACTS.\n"
-        "2. Giải thích đặc điểm sản phẩm bằng thông tin có trong FACTS; không tự đưa ra công dụng, hiệu quả "
-        "sức khỏe, thành phần hay cam kết mà dữ liệu không nêu.\n"
+        "2. Chọn USP có ích cho quyết định mua: nối tiêu chí khách nêu với khác biệt cụ thể trong FACTS "
+        "(ví dụ vừa ngân sách, dung tích phù hợp, kích thước/khả năng lắp đặt, độ ồn, điện năng, bảo hành "
+        "nếu có dữ liệu). Nói rõ lợi ích thực tế bằng lời khi suy luận đó hợp lý từ thông số; không biến tên "
+        "công nghệ thành lợi ích nếu chưa giải thích được nó giúp gì cho nhu cầu này. Không tự đưa ra công dụng, "
+        "hiệu quả sức khỏe, thành phần hay cam kết mà dữ liệu không nêu. Nếu không có khác biệt hữu ích được "
+        "chứng minh, hãy nói trung tính thay vì bịa USP.\n"
         "3. Phân tích đánh đổi (trade-off) rõ giữa các lựa chọn để khách dễ quyết.\n"
         "4. Nếu trạng thái là price_spread: khách nhờ chọn giúp và chưa chốt ngân sách — giải thích rằng "
         "các lựa chọn đại diện cho 3 tầm giá (tiết kiệm / tầm trung / cao cấp), rồi giới thiệu từng mức.\n"
@@ -54,8 +59,53 @@ def deterministic_message(intent: Dict[str, Any], status: str, db_path: Optional
                 "Cần tư vấn danh mục nào, với ngân sách và tính năng ra sao?")
     if status == "no_products_found":
         category = intent.get("category") or "nhóm sản phẩm này"
-        return (f"Hiện chưa có sản phẩm phù hợp trong dữ liệu cho {category} theo các tiêu chí đã nêu. "
-                "Có thể đổi ngân sách hoặc nới một tiêu chí để tìm lại.")
+        budget = intent.get("budget_max")
+        requested_type = intent.get("requested_product_type")
+        if db_path and budget and requested_type:
+            try:
+                with sqlite3.connect(db_path) as conn:
+                    row = conn.execute(
+                        "SELECT MIN(price_clean) FROM all_products "
+                        "WHERE category = ? AND LOWER(product_name) LIKE LOWER(?) "
+                        "AND price_clean > 0 AND price_clean > ?",
+                        (category, f"%{requested_type}%", budget),
+                    ).fetchone()
+                if row and row[0]:
+                    closest = int(row[0])
+                    increase = closest - int(budget)
+                    return (f"Chưa có {requested_type} trong ngân sách tối đa {format_vnd(int(budget))}. "
+                            f"Sản phẩm gần nhất là {format_vnd(closest)}, tức cần tăng thêm "
+                            f"{format_vnd(increase)}. Bạn có muốn nâng ngân sách lên {format_vnd(closest)} không?")
+            except (sqlite3.Error, TypeError, ValueError):
+                pass
+        if db_path and budget and not requested_type:
+            try:
+                with sqlite3.connect(db_path) as conn:
+                    row = conn.execute(
+                        "SELECT MIN(price_clean) FROM all_products WHERE category = ? "
+                        "AND price_clean > 0 AND price_clean > ?", (category, budget)
+                    ).fetchone()
+                if row and row[0]:
+                    return (f"Chưa có sản phẩm {category} nào trong dữ liệu ở mức tối đa "
+                            f"{format_vnd(int(budget))}. Mức giá gần nhất phía trên là "
+                            f"{format_vnd(int(row[0]))}. Có thể tăng ngân sách lên khoảng "
+                            f"{format_vnd(int(row[0]))}, hoặc giữ mức {format_vnd(int(budget))} "
+                            "và bỏ bớt yêu cầu về loại, mùi hương hay thương hiệu. Bạn muốn thử cách nào?")
+            except (sqlite3.Error, TypeError, ValueError):
+                pass
+        if requested_type and budget:
+            return (f"Chưa tìm thấy {requested_type} phù hợp trong catalog với ngân sách tối đa "
+                    f"{format_vnd(int(budget))}. Bạn muốn tăng ngân sách hay đổi sang mặt hàng khác?")
+        if requested_type:
+            return f"Catalog hiện chưa có sản phẩm {requested_type} để gợi ý. Bạn muốn xem mặt hàng nào khác?"
+        if budget:
+            return (f"Chưa có sản phẩm {category} nào trong dữ liệu vừa đúng ngân sách tối đa "
+                    f"{format_vnd(int(budget))} vừa khớp các tiêu chí đã nêu. Có thể giữ ngân sách "
+                    "và bỏ yêu cầu về loại, mùi hương hoặc thương hiệu; hoặc tăng ngân sách. "
+                    "Bạn muốn nới tiêu chí nào trước?")
+        return (f"Chưa có sản phẩm phù hợp trong dữ liệu cho {category}. "
+                "Có thể bỏ yêu cầu về loại, mùi hương hoặc thương hiệu để tìm thêm. "
+                "Bạn muốn nới tiêu chí nào trước?")
     return None
 
 
@@ -86,48 +136,33 @@ def generate_value_comparison_sentence(rows: List[Dict[str, Any]], priority_feat
     # Lấy mẫu rẻ nhất p1
     p1_price, p1 = sorted_rows[0]
     p1_specs = load_specs(p1)
-    p1_specs_lower = {k.lower(): v.lower() for k, v in p1_specs.items()}
-    
     best_p2 = None
-    best_features = []
+    best_features: List[tuple[str, str]] = []
     
     for p2_price, p2 in sorted_rows[1:]:
         p2_specs = load_specs(p2)
+        p1_specs_lower = {k.lower(): v.lower() for k, v in p1_specs.items()}
         p2_specs_lower = {k.lower(): v.lower() for k, v in p2_specs.items()}
         
-        # Tìm các tính năng ưu tiên mà p2 có nhưng p1 không có
+        # Tìm khác biệt có dữ liệu ở tiêu chí ưu tiên, không coi tên field
+        # giống nhau đồng nghĩa hai mẫu có cùng giá trị.
         matched = []
         for f in priority_features:
             f_low = f.lower()
-            has_in_p2 = any(f_low in k or f_low in v for k, v in p2_specs_lower.items())
-            has_in_p1 = any(f_low in k or f_low in v for k, v in p1_specs_lower.items())
-            if has_in_p2 and not has_in_p1:
-                matched.append(f)
+            fields_in_p2 = [(k, p2_specs[k]) for k, v in p2_specs_lower.items()
+                            if f_low in k or f_low in v]
+            for field, value in fields_in_p2:
+                p1_value = next((v for k, v in p1_specs.items() if k.lower() == field.lower()), None)
+                if p1_value is None or p1_value.strip().lower() != value.strip().lower():
+                    matched.append((field, value))
         
         if matched:
             best_p2 = (p2_price, p2)
             best_features = matched
             break
             
-    # Nếu không tìm thấy mẫu nào nổi trội hơn hẳn về tính năng ưu tiên, 
-    # chọn luôn mẫu có giá cao tiếp theo và lấy tính năng ưu tiên đầu tiên mà nó có
     if not best_p2:
-        p2_price, p2 = sorted_rows[1]
-        p2_specs = load_specs(p2)
-        p2_specs_lower = {k.lower(): v.lower() for k, v in p2_specs.items()}
-        
-        matched = []
-        for f in priority_features:
-            f_low = f.lower()
-            if any(f_low in k or f_low in v for k, v in p2_specs_lower.items()):
-                matched.append(f)
-        
-        if matched:
-            best_p2 = (p2_price, p2)
-            best_features = matched
-        else:
-            best_p2 = (p2_price, p2)
-            best_features = [priority_features[0]]
+        return None, None
             
     p2_price, p2 = best_p2
     price_diff = p2_price - p1_price
@@ -135,19 +170,20 @@ def generate_value_comparison_sentence(rows: List[Dict[str, Any]], priority_feat
         return None, None
         
     diff_str = format_vnd(int(price_diff))
-    features_str = ", ".join(best_features)
+    features_str = "; ".join(f"{field}: {value}" for field, value in best_features)
     p2_name = product_display_name(p2)
     
-    sentence = f"Với thêm {diff_str}, mẫu {p2_name} có thêm {features_str}."
+    sentence = f"So với mẫu thấp giá nhất, thêm {diff_str} chọn mẫu {p2_name} với khác biệt {features_str}."
     return sentence, price_diff
 
 
 def generate_advisor(query: str, intent: Dict[str, Any], rows: List[Dict[str, Any]],
                      status: str, llm, cards: List[FactCard],
                      on_delta: Optional[Callable[[str], None]] = None,
-                     addr: str = "", self_term: str = "") -> Tuple[str, bool, List[str]]:
+                     addr: str = "", self_term: str = "",
+                     db_path: Optional[str] = None) -> Tuple[str, bool, List[str]]:
     """Sinh tư vấn top-3 + trade-off. Trả (message, streamed, warnings). Fail-closed nếu bịa số."""
-    det = deterministic_message(intent, status, None, addr=addr)
+    det = deterministic_message(intent, status, db_path, addr=addr)
     if det is not None:
         log.info("advisor: dùng văn mẫu tất định (status=%s), không gọi LLM", status)
         return det, False, []
@@ -165,7 +201,11 @@ def generate_advisor(query: str, intent: Dict[str, Any], rows: List[Dict[str, An
     if is_single_recommend:
         # Lời mời xem tiếp do code chèn thêm sau (closing_hook), KHÔNG để LLM tự hỏi
         # lại kiểu "xem thêm lựa chọn khác" — tránh trùng lặp CTA.
-        action = "Hãy ĐỀ XUẤT NGẮN GỌN 1-2 sản phẩm phù hợp nhất (chỉ nêu 2-3 điểm nổi bật nhất, tuyệt đối không liệt kê toàn bộ thông số dài dòng)."
+        action = (
+            "Hãy ĐỀ XUẤT NGẮN GỌN 1-2 sản phẩm phù hợp nhất. Với mỗi mẫu, chọn 2-3 USP có sức nặng "
+            "đối với nhu cầu/đánh đổi của khách; ưu tiên lợi ích sử dụng hoặc giá trị so với giá, rồi mới "
+            "đến công nghệ. Mỗi USP phải nối được dữ kiện FACTS với nhu cầu khách, không liệt kê spec rời rạc."
+        )
     else:
         action = "Hãy tư vấn các sản phẩm kèm phân tích đánh đổi (trade-off) chi tiết giữa các lựa chọn."
         
