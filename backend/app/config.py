@@ -1,5 +1,6 @@
 import os
 from functools import lru_cache
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -11,9 +12,10 @@ _DEFAULT_AGENT_DB = os.path.join(_APP_DIR, "agent_core", "products.db")
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # b.ai exposes the OpenAI Chat Completions wire protocol at /v1.
-    llm_base_url: str = "https://api.b.ai/v1"
-    llm_api_key: str = ""
+    # XKIRO exposes an OpenAI-compatible API at /v1.
+    llm_base_url: str = "https://api.xkiro.com/v1"
+    llm_api_key: str = Field(
+        default="", validation_alias=AliasChoices("XKIRO_API_KEY", "LLM_API_KEY"))
     llm_model: str = "qwen3.8-flash"
     # Some B.AI models (including qwen3.8-flash) are enabled only on Chat
     # Completions, while DeepSeek uses Responses for reliable JSON output.

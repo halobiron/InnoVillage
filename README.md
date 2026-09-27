@@ -234,7 +234,7 @@ python -m venv .venv
 ./.venv/Scripts/python scripts/gen_db_schema_md.py
 
 cp .env.example .env
-# điền b.ai API key vào LLM_API_KEY (mặc định: deepseek-v4-flash)
+# điền XKIRO API key vào XKIRO_API_KEY (mặc định: deepseek-v4-flash)
 
 ./.venv/Scripts/uvicorn app.main:app --port 8000
 ```
@@ -243,7 +243,7 @@ Biến môi trường chính (`backend/.env`, mẫu ở `.env.example`):
 
 | Biến | Ý nghĩa | Mặc định |
 |---|---|---|
-| `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` | Endpoint tương thích OpenAI + token + tên model | `https://api.b.ai/v1` / — / `deepseek-v4-flash` |
+| `LLM_BASE_URL` / `XKIRO_API_KEY` / `LLM_MODEL` | Endpoint tương thích OpenAI + token + tên model | `https://api.xkiro.com/v1` / — / `deepseek-v4-flash` |
 | `AGENT_DB_PATH` | Đường dẫn `products.db` của agent_core | `backend/app/agent_core/products.db` |
 
 ### Frontend
