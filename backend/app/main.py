@@ -3,12 +3,13 @@ import json
 import time
 from queue import Queue
 from threading import Thread
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from app.config import get_settings
 from app.agent_core.engine import AgentCoreEngine, Engine
+from app.refill import get_refill_options, quote_refill
 
 app = FastAPI(title="Trợ lý AI Co.opSmile")
 _origins = [o.strip() for o in get_settings().frontend_origins.split(",") if o.strip()]
@@ -36,6 +37,12 @@ class ResetIn(BaseModel):
     session_id: str
 
 
+class RefillQuoteIn(BaseModel):
+    sku: str
+    quantity_kg: float
+    address: str
+
+
 def get_engine() -> Engine:
     """Trả singleton agent graph để giữ MemorySaver và epoch theo phiên."""
     global _AGENT_ENGINE
@@ -56,6 +63,20 @@ def health():
     except Exception:
         n = 0
     return {"status": "ok", "products": n}
+
+
+@app.get("/api/refill/options")
+def refill_options():
+    """Sản phẩm refill demo được dựng từ catalog đã crawl; dịch vụ là giả lập."""
+    return get_refill_options()
+
+
+@app.post("/api/refill/quote")
+def refill_quote(body: RefillQuoteIn):
+    try:
+        return quote_refill(body.sku, body.quantity_kg, body.address)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.post("/api/chat")

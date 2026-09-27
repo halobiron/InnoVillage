@@ -15,6 +15,7 @@ class ReviewItem(BaseModel):
 
 class FactCard(BaseModel):
     title: str
+    sku: str | None = None
     lines: list[FactLine] = Field(default_factory=list)
     missing: list[str] = Field(default_factory=list)
     productidweb: str | None = None

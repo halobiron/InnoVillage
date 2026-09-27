@@ -100,7 +100,21 @@ _PRODUCT_TYPES = (
     ("nước rửa chén", ("nước rửa chén", "nước rửa bát"), "Chăm sóc nhà cửa"),
     ("kem đánh răng", ("kem đánh răng",), "Chăm sóc cá nhân"),
     ("bàn chải đánh răng", ("bàn chải đánh răng",), "Chăm sóc cá nhân"),
+    # Apparel aliases cover the Shopee fashion rows as well as short follow-ups
+    # such as "tư vấn bộ đồ này". These are only enabled when the category is
+    # actually present in the active catalog.
+    ("đồ bộ", ("đồ bộ", "bộ đồ", "set bộ", "pijama", "pyjama", "đồ ngủ"), "Thời trang"),
 )
+
+
+def matches_requested_product_type(product_type: str, product_name: str) -> bool:
+    """Match known product aliases without requiring one exact title spelling."""
+    wanted = _fold_vietnamese(product_type)
+    name = _fold_vietnamese(product_name)
+    if wanted == _fold_vietnamese("đồ bộ"):
+        return any(_fold_vietnamese(alias) in name for alias in
+                   ("đồ bộ", "bộ đồ", "set bộ", "pijama", "pyjama", "đồ ngủ"))
+    return wanted in name
 
 
 def infer_requested_product_type(text: str, categories: List[str]) -> tuple[str, str] | None:

@@ -443,9 +443,9 @@ def retrieval_node(state: AgentState, config) -> AgentState:
                           if str(p.get("brand") or "").casefold() == requested_brand.casefold()]
             requested_type = intent.get("requested_product_type")
             if requested_type:
-                from app.agent_core.intent import _fold_vietnamese
-                scoped = [p for p in scoped if _fold_vietnamese(requested_type) in _fold_vietnamese(
-                    str(p.get("product_name") or p.get("key_specs_summary") or ""))]
+                from app.agent_core.intent import matches_requested_product_type
+                scoped = [p for p in scoped if matches_requested_product_type(
+                    requested_type, str(p.get("product_name") or p.get("key_specs_summary") or ""))]
             if intent.get("explicit_catalog_product"):
                 scoped = [p for p in scoped if matches_explicit_catalog_name(
                     state.get("query", ""), str(p.get("product_name") or p.get("key_specs_summary") or ""))]
@@ -477,9 +477,9 @@ def retrieval_node(state: AgentState, config) -> AgentState:
         )
         requested_type = intent.get("requested_product_type")
         if requested_type:
-            from app.agent_core.intent import _fold_vietnamese
-            typed_rows = [p for p in res.get("all_top_k", []) if _fold_vietnamese(requested_type) in
-                          _fold_vietnamese(str(p.get("product_name") or p.get("key_specs_summary") or ""))]
+            from app.agent_core.intent import matches_requested_product_type
+            typed_rows = [p for p in res.get("all_top_k", []) if matches_requested_product_type(
+                requested_type, str(p.get("product_name") or p.get("key_specs_summary") or ""))]
             res = {**res, "status": "custom_query" if typed_rows else "no_products_found",
                    "total_matches_found": len(typed_rows), "all_top_k": typed_rows,
                    "top_3_products": typed_rows[:3]}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { sendChat, sendChatStream, resetChat } from './api'
 import Message from './components/Message'
 import QuickSuggestions from './components/QuickSuggestions'
+import RefillDemo from './components/RefillDemo'
 
 const SID = (() => {
   let s = sessionStorage.getItem('emx_sid')
@@ -200,6 +201,8 @@ export default function App() {
             </button>
           </div>
         </header>
+
+        <RefillDemo />
 
         {/* Chat Feed */}
         <main className="chat-viewport" ref={chatRef}>

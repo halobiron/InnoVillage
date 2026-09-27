@@ -249,8 +249,15 @@ def search_products(
         params.append(brand.strip())
 
     if product_type and product_type.strip():
-        conditions.append("LOWER(product_name) LIKE LOWER(?)")
-        params.append(f"%{product_type.strip()}%")
+        if product_type.strip().casefold() == "đồ bộ":
+            aliases = ("đồ bộ", "bộ đồ", "set bộ", "pijama", "pyjama", "đồ ngủ")
+            patterns = [pattern for alias in aliases
+                        for pattern in (f"%{alias}%", f"%{alias.title()}%")]
+            conditions.append("(" + " OR ".join("product_name LIKE ?" for _ in patterns) + ")")
+            params.extend(patterns)
+        else:
+            conditions.append("LOWER(product_name) LIKE LOWER(?)")
+            params.append(f"%{product_type.strip()}%")
         
     sql = "SELECT * FROM all_products"
     if conditions:

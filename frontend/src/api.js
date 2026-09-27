@@ -67,3 +67,19 @@ export async function resetChat(sessionId) {
     body: JSON.stringify({ session_id: sessionId }),
   })
 }
+
+export async function getRefillOptions() {
+  const response = await fetch('/api/refill/options')
+  if (!response.ok) throw new Error('Không tải được danh sách refill')
+  return response.json()
+}
+
+export async function getRefillQuote({ sku, quantityKg, address }) {
+  const response = await fetch('/api/refill/quote', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sku, quantity_kg: quantityKg, address }),
+  })
+  const payload = await response.json()
+  if (!response.ok) throw new Error(payload.detail || 'Không tính được đơn refill')
+  return payload
+}

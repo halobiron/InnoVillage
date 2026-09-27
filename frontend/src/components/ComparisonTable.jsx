@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RefillAction from './RefillAction'
 
 function findCardForProduct(p, cards) {
   if (!cards || !cards.length) return null
@@ -199,15 +200,20 @@ export default function ComparisonTable({ table, cards, blindMode = false, revea
                 const card = findCardForProduct(p, cards)
                 return (
                   <td key={i}>
-                    {(!blindMode || revealed.includes(i)) && card && card.product_link ? (
-                      <a
-                        href={card.product_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="table-buy-btn"
-                      >
-                        Đặt mua
-                      </a>
+                    {(!blindMode || revealed.includes(i)) && card ? (
+                      <div className="table-product-actions">
+                        {card.product_link ? (
+                          <a
+                            href={card.product_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="table-buy-btn"
+                          >
+                            Đặt mua
+                          </a>
+                        ) : null}
+                        <RefillAction card={card} />
+                      </div>
                     ) : null}
                   </td>
                 )

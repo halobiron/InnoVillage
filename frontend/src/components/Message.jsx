@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import ComparisonTable from './ComparisonTable'
 import ContextualSuggestions from './ContextualSuggestions'
+import RefillAction from './RefillAction'
 
 export default function Message({ msg, isLast, onSuggest, disabled, blindMode = false }) {
   const { role, text, recommendation } = msg
@@ -130,6 +131,7 @@ export default function Message({ msg, isLast, onSuggest, disabled, blindMode = 
                         Mua ngay
                       </a>
                     )}
+                    {isRevealed && <RefillAction card={c} />}
                   </div>
                 </div>
               </div>

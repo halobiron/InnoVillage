@@ -123,7 +123,7 @@ def build_reco_card(row: Dict[str, Any], priority_features: List[str], self_term
                                source="khuyến mãi (catalog)"))
     missing.extend(_ALWAYS_MISSING)
 
-    card = FactCard(title=f"{name}", lines=lines, missing=missing,
+    card = FactCard(title=f"{name}", sku=row.get("sku"), lines=lines, missing=missing,
                     productidweb=meta["productidweb"], image_url=meta["image"],
                     product_link=meta["link"])
     _apply_db_rating(card, meta["rating"])
@@ -151,7 +151,7 @@ def build_detail_card(row: Dict[str, Any]) -> FactCard:
                                source="khuyến mãi (catalog)"))
     missing.extend(_ALWAYS_MISSING)
 
-    card = FactCard(title=f"Thông tin chi tiết: {name}", lines=lines, missing=missing,
+    card = FactCard(title=f"Thông tin chi tiết: {name}", sku=row.get("sku"), lines=lines, missing=missing,
                     productidweb=meta["productidweb"], image_url=meta["image"],
                     product_link=meta["link"])
     _apply_db_rating(card, meta["rating"])
